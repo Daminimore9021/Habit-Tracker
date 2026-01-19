@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Check, Plus, Loader2, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AddItemModal from './AddItemModal'
+import ItemDetailModal from './ItemDetailModal'
 
 interface Item {
     id: string
@@ -21,6 +22,8 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
     const [newItemText, setNewItemText] = useState('')
     const [newItemType, setNewItemType] = useState<'task' | 'habit' | 'routine'>('task')
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
     const dateStr = selectedDate.toISOString().split('T')[0]
 
@@ -189,6 +192,13 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                     defaultDate={dateStr}
                 />
             )}
+
+            <ItemDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                item={selectedItem}
+            />
+
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                 <div>
                     <h2 className="text-xl font-bold text-white">Daily Focus</h2>
@@ -218,7 +228,13 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                                 <div className="text-[10px] text-gray-600 italic py-4">No tasks.</div>
                             ) : (
                                 items.filter(item => item.type === 'task').map(item => (
-                                    <ItemRow key={item.id} item={item} toggleItem={toggleItem} deleteItem={deleteItem} />
+                                    <ItemRow
+                                        key={item.id}
+                                        item={item}
+                                        toggleItem={toggleItem}
+                                        deleteItem={deleteItem}
+                                        onView={(item) => { setSelectedItem(item); setIsDetailModalOpen(true); }}
+                                    />
                                 ))
                             )}
                         </div>
@@ -240,7 +256,13 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                                 <div className="text-[10px] text-gray-600 italic py-4">No habits.</div>
                             ) : (
                                 items.filter(item => item.type === 'habit').map(item => (
-                                    <ItemRow key={item.id} item={item} toggleItem={toggleItem} deleteItem={deleteItem} />
+                                    <ItemRow
+                                        key={item.id}
+                                        item={item}
+                                        toggleItem={toggleItem}
+                                        deleteItem={deleteItem}
+                                        onView={(item) => { setSelectedItem(item); setIsDetailModalOpen(true); }}
+                                    />
                                 ))
                             )}
                         </div>
@@ -262,7 +284,13 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                                 <div className="text-[10px] text-gray-600 italic py-4">No routines.</div>
                             ) : (
                                 items.filter(item => item.type === 'routine').map(item => (
-                                    <ItemRow key={item.id} item={item} toggleItem={toggleItem} deleteItem={deleteItem} />
+                                    <ItemRow
+                                        key={item.id}
+                                        item={item}
+                                        toggleItem={toggleItem}
+                                        deleteItem={deleteItem}
+                                        onView={(item) => { setSelectedItem(item); setIsDetailModalOpen(true); }}
+                                    />
                                 ))
                             )}
                         </div>
@@ -273,7 +301,7 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
     )
 }
 
-function ItemRow({ item, toggleItem, deleteItem }: { item: Item, toggleItem: any, deleteItem: any }) {
+function ItemRow({ item, toggleItem, deleteItem, onView }: { item: Item, toggleItem: any, deleteItem: any, onView: (item: Item) => void }) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -284,7 +312,10 @@ function ItemRow({ item, toggleItem, deleteItem }: { item: Item, toggleItem: any
                 }`}
         >
             <button
-                onClick={() => toggleItem(item.id, item.type, item.completed)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    toggleItem(item.id, item.type, item.completed);
+                }}
                 className={`w-6 h-6 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${item.completed
                     ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20'
                     : 'border-gray-700 text-transparent hover:border-indigo-400'
@@ -293,7 +324,7 @@ function ItemRow({ item, toggleItem, deleteItem }: { item: Item, toggleItem: any
                 <Check size={14} strokeWidth={4} />
             </button>
 
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onView(item)}>
                 <div className={`font-semibold text-xs sm:text-sm truncate transition-all ${item.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
                     {item.title}
                 </div>
@@ -309,7 +340,10 @@ function ItemRow({ item, toggleItem, deleteItem }: { item: Item, toggleItem: any
                         </span>
                     )}
                     <button
-                        onClick={() => deleteItem(item.id, item.type)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            deleteItem(item.id, item.type);
+                        }}
                         className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 text-gray-500 hover:text-red-400 rounded-lg transition-all"
                     >
                         <Trash2 size={12} />

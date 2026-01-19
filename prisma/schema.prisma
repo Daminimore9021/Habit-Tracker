@@ -15,6 +15,7 @@ model User {
   username  String?   @unique
   password  String?
   name      String    @default("User")
+  avatar    String?   // Base64 string or URL
   level     Int       @default(1)
   xp        Int       @default(0)
   totalXp   Int       @default(0)

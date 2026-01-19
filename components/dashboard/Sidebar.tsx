@@ -31,6 +31,7 @@ const navItems = [
     { id: 'habits', label: 'Habits', icon: LayoutDashboard },
     { id: 'routine', label: 'Routine', icon: Calendar },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+    { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
 export default function Sidebar({ activeTab, setActiveTab, logout, userId }: SidebarProps) {

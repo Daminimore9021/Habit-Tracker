@@ -15,9 +15,10 @@ import DailyPlanner from './dashboard/DailyPlanner'
 import HabitGrid from './dashboard/HabitGrid'
 import RoutineGrid from './dashboard/RoutineGrid'
 import TaskGrid from './dashboard/TaskGrid'
+import SettingsView from './dashboard/SettingsView'
 
 export default function AnimatedDashboard() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'routine' | 'tasks' | 'habits'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'routine' | 'tasks' | 'habits' | 'settings'>('dashboard')
   const [mounted, setMounted] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [userId, setUserId] = useState<string | null>(null)
@@ -114,6 +115,18 @@ export default function AnimatedDashboard() {
                 className="space-y-6 sm:space-y-10"
               >
                 <TaskGrid userId={userId || undefined} />
+              </motion.div>
+            )}
+
+            {activeTab === 'settings' && (
+              <motion.div
+                key="settings"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="space-y-6 sm:space-y-10"
+              >
+                <SettingsView userId={userId || undefined} />
               </motion.div>
             )}
           </AnimatePresence>

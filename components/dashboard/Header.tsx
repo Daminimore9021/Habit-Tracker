@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import MoodTracker from './MoodTracker'
 export default function Header({ userId }: { userId?: string }) {
     const [userName, setUserName] = useState('User')
+    const [userAvatar, setUserAvatar] = useState<string | null>(null)
     const today = new Date()
 
     useEffect(() => {
@@ -21,6 +22,7 @@ export default function Header({ userId }: { userId?: string }) {
                 }
                 const data = await res.json()
                 if (data.name) setUserName(data.name)
+                if (data.avatar) setUserAvatar(data.avatar)
             } catch (e) {
                 console.error("Failed to fetch user", e)
             }
@@ -64,7 +66,7 @@ export default function Header({ userId }: { userId?: string }) {
 
                     <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 p-[2px]">
                         <img
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`}
+                            src={userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`}
                             alt="Profile"
                             className="rounded-full bg-black h-full w-full object-cover"
                         />

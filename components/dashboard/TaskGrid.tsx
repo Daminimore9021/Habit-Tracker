@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Trash2, Calendar, Plus, Loader2, Target } from 'lucide-react'
 import AddItemModal from './AddItemModal'
+import ItemDetailModal from './ItemDetailModal'
 
 export default function TaskGrid({ userId }: { userId?: string }) {
     const [tasks, setTasks] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+    const [selectedItem, setSelectedItem] = useState<any>(null)
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
     const fetchTasks = async () => {
         if (!userId) return
@@ -67,6 +70,12 @@ export default function TaskGrid({ userId }: { userId?: string }) {
                 lockType={true}
             />
 
+            <ItemDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                item={selectedItem}
+            />
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                 <div className="flex items-center gap-4">
                     <div>
@@ -110,18 +119,33 @@ export default function TaskGrid({ userId }: { userId?: string }) {
                             >
                                 <div className="flex items-start gap-4">
                                     <button
-                                        onClick={() => toggleComplete(task.id, task.completed)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleComplete(task.id, task.completed);
+                                        }}
                                         className={`mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${task.completed ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 hover:border-indigo-400'}`}
                                     >
                                         {task.completed && <Check size={14} strokeWidth={3} />}
                                     </button>
-                                    <div className="flex-1 min-w-0">
+                                    <div
+                                        className="flex-1 min-w-0 cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedItem({ ...task, type: 'task' });
+                                            setIsDetailModalOpen(true);
+                                        }}
+                                    >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <Target size={14} className="text-indigo-400" />
                                                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{task.date}</span>
                                             </div>
-                                            <button onClick={() => deleteTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteTask(task.id);
+                                                }}
+                                                className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all"
+                                            >
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>

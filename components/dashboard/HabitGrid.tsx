@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Flame, Plus, MoreHorizontal, Trash2 } from 'lucide-react'
 import AddItemModal from './AddItemModal'
+import ItemDetailModal from './ItemDetailModal'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -32,6 +33,8 @@ export default function HabitGrid({ userId }: { userId?: string }) {
     const [habits, setHabits] = useState<Habit[]>([])
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedItem, setSelectedItem] = useState<any>(null)
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
     // Get current week dates (Mon-Sun)
     const [weekDates, setWeekDates] = useState<Date[]>([])
@@ -145,6 +148,13 @@ export default function HabitGrid({ userId }: { userId?: string }) {
                 initialType="habit"
                 lockType={true}
             />
+
+            <ItemDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                item={selectedItem}
+            />
+
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h2 className="text-xl font-bold text-white">Daily Habits</h2>
@@ -197,11 +207,20 @@ export default function HabitGrid({ userId }: { userId?: string }) {
                                 {/* Habit Info */}
                                 <div className="flex items-center gap-3">
                                     <div className={`w-1 h-8 rounded-full bg-gradient-to-b ${habit.color || "from-gray-500 to-gray-700"}`}></div>
-                                    <div className="flex-1 min-w-0">
+                                    <div
+                                        className="flex-1 min-w-0 cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedItem({ ...habit, title: habit.name, type: 'habit' });
+                                            setIsDetailModalOpen(true);
+                                        }}
+                                    >
                                         <div className="flex items-center justify-between">
                                             <h4 className="font-semibold text-gray-200 group-hover:text-white transition-colors truncate">{habit.name}</h4>
                                             <button
-                                                onClick={() => deleteHabit(habit.id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteHabit(habit.id);
+                                                }}
                                                 className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all ml-2"
                                                 title="Delete Habit"
                                             >

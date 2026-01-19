@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Trash2, Clock, Plus, Loader2 } from 'lucide-react'
 import AddItemModal from './AddItemModal'
+import ItemDetailModal from './ItemDetailModal'
 
 export default function RoutineGrid({ userId }: { userId?: string }) {
     const [routines, setRoutines] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedItem, setSelectedItem] = useState<any>(null)
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
     const fetchRoutines = async () => {
         if (!userId) return
@@ -65,6 +68,12 @@ export default function RoutineGrid({ userId }: { userId?: string }) {
                 lockType={true}
             />
 
+            <ItemDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                item={selectedItem}
+            />
+
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h2 className="text-xl font-bold text-white">Daily Routine</h2>
@@ -100,12 +109,21 @@ export default function RoutineGrid({ userId }: { userId?: string }) {
                             >
                                 <div className="flex items-start gap-4">
                                     <button
-                                        onClick={() => toggleComplete(routine.id, routine.completed)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleComplete(routine.id, routine.completed);
+                                        }}
                                         className={`mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${routine.completed ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-700 hover:border-indigo-400'}`}
                                     >
                                         {routine.completed && <Check size={14} strokeWidth={3} />}
                                     </button>
-                                    <div className="flex-1 min-w-0">
+                                    <div
+                                        className="flex-1 min-w-0 cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedItem({ ...routine, type: 'routine' });
+                                            setIsDetailModalOpen(true);
+                                        }}
+                                    >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -113,7 +131,13 @@ export default function RoutineGrid({ userId }: { userId?: string }) {
                                                     {routine.time}
                                                 </span>
                                             </div>
-                                            <button onClick={() => deleteRoutine(routine.id)} className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteRoutine(routine.id);
+                                                }}
+                                                className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all"
+                                            >
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
