@@ -2,19 +2,6 @@
 
 A comprehensive, premium habit tracking application built with Next.js and Tailwind CSS.
 
-## Screenshots
-
-<div align="center">
-  <img src="public/screenshots/dashboard.png" alt="Dashboard" width="800" />
-</div>
-
-| Sign In | Sign Up |
-|:---:|:---:|
-| <img src="public/screenshots/signin_page.png" width="400" /> | <img src="public/screenshots/signup_page.png" width="400" /> |
-
-| Add New Item (Translate) | Habits View |
-|:---:|:---:|
-| <img src="public/screenshots/add_item_modal.png" width="400" /> | <img src="public/screenshots/habits_page.png" width="400" /> |
 
 ## Features
 
