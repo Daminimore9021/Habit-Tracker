@@ -1,17 +1,30 @@
 # Habit Tracker Dashboard
 
-A comprehensive habit tracking application built with Next.js and Tailwind CSS.
+A comprehensive, premium habit tracking application built with Next.js and Tailwind CSS.
+
+## Screenshots
+
+<div align="center">
+  <img src="public/screenshots/dashboard.png" alt="Dashboard" width="800" />
+</div>
+
+| Sign In | Sign Up |
+|:---:|:---:|
+| <img src="public/screenshots/signin_page.png" width="400" /> | <img src="public/screenshots/signup_page.png" width="400" /> |
+
+| Add New Item (Translate) | Habits View |
+|:---:|:---:|
+| <img src="public/screenshots/add_item_modal.png" width="400" /> | <img src="public/screenshots/habits_page.png" width="400" /> |
 
 ## Features
 
-- **Dashboard Overview**: View progress for habits, tasks, and routines
-- **Daily Routine Tab**: Track daily routines with time-based scheduling
-- **Tasks Tab**: Manage tasks with priorities and due dates
-- **Habits Tab**: Track habits with streak counters and progress
-- **Daily Tab**: View all activities (routines, tasks, habits) for any day
-- **Horizontal Navigation**: Easy navigation between different sections
-- **Local Storage**: All data is persisted in browser localStorage
-- **Progress Tracking**: Visual progress bars and completion statistics
+- **📊 Dashboard Overview**: View progress for habits, tasks, and routines in a unified 3-column layout.
+- **✨ AI Translation**: Integrated "Magic Translate" feature. Type in Hindi, Marathi, or Hinglish, and instantly convert to English!
+- **📅 Daily Routine Tab**: Track daily routines with time-based scheduling.
+- **✅ Tasks Management**: Manage tasks with priorities and due dates.
+- **🔥 Habits Tracking**: Track habits with streak counters and progress visualization.
+- **🔒 Secure Authentication**: Robust Login and Signup with user session management.
+- **💾 Database Persistence**: Uses Prisma with SQLite (dev) / Postgres (prod) for reliable data storage.
 
 ## Getting Started
 
@@ -20,30 +33,28 @@ A comprehensive habit tracking application built with Next.js and Tailwind CSS.
 npm install
 ```
 
-2. Run the development server:
+2. Initialize the database:
+```bash
+npx prisma generate
+npx prisma db push
+node scripts/seed-user-data.js # Optional: Add dummy data
+```
+
+3. Run the development server:
 ```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
-
-4. Login with any username and password (demo mode)
-
-## Usage
-
-- **Login**: Enter any username and password to access the dashboard
-- **Add Routines**: Set up daily routines with specific times
-- **Add Tasks**: Create tasks with priorities and due dates
-- **Add Habits**: Track habits and build streaks
-- **Daily View**: See all activities for today, yesterday, or any past date
-- **Progress Tracking**: Monitor your completion rates across all categories
+4. Open [http://localhost:3000](http://localhost:3000)
 
 ## Tech Stack
 
-- Next.js 14
+- Next.js 14 (App Router)
 - React 18
 - TypeScript
 - Tailwind CSS
-- LocalStorage for data persistence
+- Prisma (ORM)
+- Framer Motion (Animations)
+- Lucide React (Icons)
 
 
