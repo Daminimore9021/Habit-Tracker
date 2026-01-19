@@ -1,0 +1,321 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Check, Plus, Loader2, Trash2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import AddItemModal from './AddItemModal'
+
+interface Item {
+    id: string
+    type: 'habit' | 'routine' | 'task'
+    title: string
+    completed: boolean
+    time?: string // for routines
+    emoji?: string // for habits
+    description?: string
+}
+
+export default function DailyPlanner({ selectedDate, userId }: { selectedDate: Date, userId?: string }) {
+    const [items, setItems] = useState<Item[]>([])
+    const [loading, setLoading] = useState(true)
+    const [newItemText, setNewItemText] = useState('')
+    const [newItemType, setNewItemType] = useState<'task' | 'habit' | 'routine'>('task')
+    const [isModalOpen, setIsModalOpen] = useState(false)
+
+    const dateStr = selectedDate.toISOString().split('T')[0]
+
+    const fetchData = async () => {
+        if (!userId) return
+        setLoading(true)
+        try {
+            console.log(`DailyPlanner: Fetching data for userId: ${userId}, date: ${dateStr}`);
+            const [habitsRes, tasksRes, routinesRes] = await Promise.all([
+                fetch(`/api/habits?userId=${userId}`),
+                fetch(`/api/tasks?date=${dateStr}&userId=${userId}`),
+                fetch(`/api/routines?userId=${userId}`)
+            ]);
+
+            if (!habitsRes.ok || !tasksRes.ok || !routinesRes.ok) {
+                console.error("DailyPlanner: One or more fetches failed", {
+                    habits: habitsRes.status,
+                    tasks: tasksRes.status,
+                    routines: routinesRes.status
+                });
+            }
+
+            const habits = await habitsRes.json()
+            const tasks = await tasksRes.json()
+            const routines = await routinesRes.json()
+
+            console.log("DailyPlanner: Received raw data", { habits, tasks, routines });
+
+            const combined: Item[] = [
+                ...(Array.isArray(habits) ? habits.map((h: any) => ({
+                    id: h.id,
+                    type: 'habit' as const,
+                    title: h.title,
+                    completed: h.logs?.some((l: any) => l.date === dateStr) || false,
+                    emoji: h.emoji,
+                    description: h.description
+                })) : []),
+                ...(Array.isArray(routines) ? routines.map((r: any) => ({
+                    id: r.id,
+                    type: 'routine' as const,
+                    title: r.title,
+                    completed: r.completed,
+                    time: r.time,
+                    description: r.description
+                })) : []),
+                ...(Array.isArray(tasks) ? tasks.map((t: any) => ({
+                    id: t.id,
+                    type: 'task' as const,
+                    title: t.title,
+                    completed: t.completed,
+                    description: t.description
+                })) : [])
+            ]
+
+            console.log("DailyPlanner: Combined Items:", combined)
+            setItems(combined)
+        } catch (e) {
+            console.error("DailyPlanner: Failed to fetch data", e)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchData()
+    }, [selectedDate, userId])
+
+    const deleteItem = async (id: string, type: 'habit' | 'routine' | 'task') => {
+        if (!userId) return
+
+        // Optimistic UI update
+        setItems(prev => prev.filter(item => item.id !== id))
+
+        try {
+            const endpoint = type === 'habit' ? '/api/habits' : type === 'task' ? '/api/tasks' : '/api/routines'
+            const res = await fetch(endpoint, {
+                method: 'DELETE',
+                body: JSON.stringify({ id, userId })
+            })
+            if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+        } catch (e) {
+            console.error("DailyPlanner: Failed to delete", e)
+            fetchData() // Re-fetch on error to restore item
+        }
+    }
+
+    const toggleItem = async (id: string, type: 'habit' | 'routine' | 'task', currentCompleted: boolean) => {
+        if (!userId) return
+        setItems(prev => prev.map(item =>
+            item.id === id ? { ...item, completed: !currentCompleted } : item
+        ))
+
+        try {
+            let res;
+            if (type === 'habit') {
+                res = await fetch('/api/habits/log', {
+                    method: 'POST',
+                    body: JSON.stringify({ habitId: id, date: dateStr, completed: !currentCompleted, userId })
+                })
+            } else if (type === 'task') {
+                res = await fetch('/api/tasks', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ id, completed: !currentCompleted, userId })
+                })
+            } else if (type === 'routine') {
+                res = await fetch('/api/routines', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ id, completed: !currentCompleted, userId })
+                })
+            }
+            if (res && !res.ok) throw new Error(`Toggle failed: ${res.status}`);
+        } catch (e) {
+            console.error("DailyPlanner: Failed to toggle", e)
+            fetchData(); // Sync back
+        }
+    }
+
+    const addNewItem = async () => {
+        if (!newItemText.trim() || !userId) {
+            console.warn("DailyPlanner: Cannot add item", { newItemText, userId });
+            return
+        }
+
+        try {
+            let res;
+            if (newItemType === 'task') {
+                res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    body: JSON.stringify({ title: newItemText, date: dateStr, userId })
+                })
+            } else if (newItemType === 'habit') {
+                res = await fetch('/api/habits', {
+                    method: 'POST',
+                    body: JSON.stringify({ title: newItemText, emoji: '⚡', color: 'blue', userId })
+                })
+            } else if (newItemType === 'routine') {
+                res = await fetch('/api/routines', {
+                    method: 'POST',
+                    body: JSON.stringify({ title: newItemText, time: 'Daily', userId })
+                })
+            }
+
+            if (res && res.ok) {
+                setNewItemText('')
+                fetchData() // Refresh list
+            } else {
+                const errData = await res?.json();
+                console.error("DailyPlanner: Failed to add item", errData);
+                alert(`Failed to add: ${errData?.error || 'Unknown error'}`);
+            }
+        } catch (e) {
+            console.error("DailyPlanner: Error adding item", e)
+            alert("Error adding item. Check console.");
+        }
+    }
+
+    return (
+        <div className="w-full h-full bg-[#050505] rounded-[2rem] p-4 sm:p-6 border border-[#2a2a30]">
+            {userId && (
+                <AddItemModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    userId={userId}
+                    onSuccess={fetchData}
+                    initialType={newItemType}
+                    defaultDate={dateStr}
+                />
+            )}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                <div>
+                    <h2 className="text-xl font-bold text-white">Daily Focus</h2>
+                    <p className="text-sm text-gray-500">{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="flex items-center justify-center py-20">
+                    <Loader2 className="animate-spin text-indigo-500" />
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Tasks Section */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Tasks</h3>
+                            <button
+                                onClick={() => { setNewItemType('task'); setIsModalOpen(true); }}
+                                className="p-1 hover:bg-white/5 rounded-lg text-indigo-400 transition-colors"
+                            >
+                                <Plus size={18} />
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {items.filter(item => item.type === 'task').length === 0 ? (
+                                <div className="text-[10px] text-gray-600 italic py-4">No tasks.</div>
+                            ) : (
+                                items.filter(item => item.type === 'task').map(item => (
+                                    <ItemRow key={item.id} item={item} toggleItem={toggleItem} deleteItem={deleteItem} />
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Habits Section */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Habits</h3>
+                            <button
+                                onClick={() => { setNewItemType('habit'); setIsModalOpen(true); }}
+                                className="p-1 hover:bg-white/5 rounded-lg text-pink-400 transition-colors"
+                            >
+                                <Plus size={18} />
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {items.filter(item => item.type === 'habit').length === 0 ? (
+                                <div className="text-[10px] text-gray-600 italic py-4">No habits.</div>
+                            ) : (
+                                items.filter(item => item.type === 'habit').map(item => (
+                                    <ItemRow key={item.id} item={item} toggleItem={toggleItem} deleteItem={deleteItem} />
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Routines Section */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Routine</h3>
+                            <button
+                                onClick={() => { setNewItemType('routine'); setIsModalOpen(true); }}
+                                className="p-1 hover:bg-white/5 rounded-lg text-blue-400 transition-colors"
+                            >
+                                <Plus size={18} />
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {items.filter(item => item.type === 'routine').length === 0 ? (
+                                <div className="text-[10px] text-gray-600 italic py-4">No routines.</div>
+                            ) : (
+                                items.filter(item => item.type === 'routine').map(item => (
+                                    <ItemRow key={item.id} item={item} toggleItem={toggleItem} deleteItem={deleteItem} />
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function ItemRow({ item, toggleItem, deleteItem }: { item: Item, toggleItem: any, deleteItem: any }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`group flex items-center gap-3 p-3 rounded-2xl border transition-all duration-200 ${item.completed
+                ? 'bg-indigo-500/5 border-indigo-500/10 opacity-60'
+                : 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                }`}
+        >
+            <button
+                onClick={() => toggleItem(item.id, item.type, item.completed)}
+                className={`w-6 h-6 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${item.completed
+                    ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                    : 'border-gray-700 text-transparent hover:border-indigo-400'
+                    }`}
+            >
+                <Check size={14} strokeWidth={4} />
+            </button>
+
+            <div className="flex-1 min-w-0">
+                <div className={`font-semibold text-xs sm:text-sm truncate transition-all ${item.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
+                    {item.title}
+                </div>
+                {item.description && (
+                    <div className={`text-[9px] sm:text-[10px] mt-0.5 line-clamp-1 transition-all ${item.completed ? 'text-gray-600' : 'text-gray-400'}`}>
+                        {item.description}
+                    </div>
+                )}
+                <div className="flex items-center justify-between mt-1">
+                    {item.time && (
+                        <span className="text-[9px] text-gray-500 font-mono">
+                            {item.time}
+                        </span>
+                    )}
+                    <button
+                        onClick={() => deleteItem(item.id, item.type)}
+                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 text-gray-500 hover:text-red-400 rounded-lg transition-all"
+                    >
+                        <Trash2 size={12} />
+                    </button>
+                </div>
+            </div>
+        </motion.div>
+    )
+}

@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  username  String?   @unique
+  password  String?
+  name      String    @default("User")
+  level     Int       @default(1)
+  xp        Int       @default(0)
+  totalXp   Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  habits    Habit[]
+  moods     MoodLog[]
+  tasks     Task[]
+  routines  Routine[]
+}
+
+model Habit {
+  id        String     @id @default(cuid())
+  title     String
+  emoji     String     @default("📝")
+  color     String     @default("#3b82f6")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  description String?
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  logs        HabitLog[]
+  streak      Int        @default(0)
+}
+
+model HabitLog {
+  id        String   @id @default(cuid())
+  date      String   // ISO date string (YYYY-MM-DD)
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([date, habitId])
+}
+
+model MoodLog {
+  id        String   @id @default(cuid())
+  date      String   @unique // One mood per day
+  moodType  String   // great, good, okay, bad, awful
+  message   String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  title     String
+  completed Boolean  @default(false)
+  date      String   // YYYY-MM-DD
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Routine {
+  id        String   @id @default(cuid())
+  title     String
+  time      String   // e.g. "5:00 - 5:15"
+  completed Boolean  @default(false) // Static baseline completion or usage?
+  order     Int      @default(0)
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}
