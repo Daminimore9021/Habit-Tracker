@@ -67,7 +67,7 @@ export default function CalendarWidget({ selectedDate, onSelect }: CalendarWidge
     }
 
     return (
-        <div className="bg-[#050505] rounded-[2rem] p-6 border border-[#2a2a30] h-full flex flex-col justify-start sm:justify-center min-h-[350px]">
+        <div className="bg-[#050505] rounded-[2rem] p-6 border border-[#2a2a30] w-full flex flex-col justify-start min-h-[350px]">
             <div className="flex items-center justify-between mb-8 sm:mb-6">
                 <h3 className="font-bold text-white text-lg">
                     {monthNames[month]} {year}

@@ -25,6 +25,7 @@ model User {
   moods     MoodLog[]
   tasks     Task[]
   routines  Routine[]
+  badges    UserBadge[]
 }
 
 model Habit {
@@ -81,4 +82,14 @@ model Routine {
   description String?
   userId      String
   user        User     @relation(fields: [userId], references: [id])
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  badgeId   String   // The code from badges.ts (e.g., 'streak_7')
+  earnedAt  DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
 }

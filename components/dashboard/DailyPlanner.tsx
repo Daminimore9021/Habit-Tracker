@@ -135,6 +135,14 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                 })
             }
             if (res && !res.ok) throw new Error(`Toggle failed: ${res.status}`);
+
+            // Trigger Badge Check
+            if (res && res.ok && userId) {
+                await fetch('/api/badges', {
+                    method: 'POST',
+                    body: JSON.stringify({ userId, actionContext: { type: 'item_toggle', itemType: type } })
+                })
+            }
         } catch (e) {
             console.error("DailyPlanner: Failed to toggle", e)
             fetchData(); // Sync back
@@ -204,6 +212,13 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                     <h2 className="text-xl font-bold text-white">Daily Focus</h2>
                     <p className="text-sm text-gray-500">{selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                 </div>
+                <button
+                    onClick={() => { setNewItemType('task'); setIsModalOpen(true); }}
+                    className="group flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                >
+                    <Plus size={16} className="group-hover:scale-110 transition-transform" />
+                    Add Item
+                </button>
             </div>
 
             {loading ? (
@@ -216,12 +231,6 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                     <div className="space-y-4">
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Tasks</h3>
-                            <button
-                                onClick={() => { setNewItemType('task'); setIsModalOpen(true); }}
-                                className="p-1 hover:bg-white/5 rounded-lg text-indigo-400 transition-colors"
-                            >
-                                <Plus size={18} />
-                            </button>
                         </div>
                         <div className="space-y-3">
                             {items.filter(item => item.type === 'task').length === 0 ? (
@@ -244,12 +253,6 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                     <div className="space-y-4">
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Habits</h3>
-                            <button
-                                onClick={() => { setNewItemType('habit'); setIsModalOpen(true); }}
-                                className="p-1 hover:bg-white/5 rounded-lg text-pink-400 transition-colors"
-                            >
-                                <Plus size={18} />
-                            </button>
                         </div>
                         <div className="space-y-3">
                             {items.filter(item => item.type === 'habit').length === 0 ? (
@@ -272,12 +275,6 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                     <div className="space-y-4">
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Routine</h3>
-                            <button
-                                onClick={() => { setNewItemType('routine'); setIsModalOpen(true); }}
-                                className="p-1 hover:bg-white/5 rounded-lg text-blue-400 transition-colors"
-                            >
-                                <Plus size={18} />
-                            </button>
                         </div>
                         <div className="space-y-3">
                             {items.filter(item => item.type === 'routine').length === 0 ? (

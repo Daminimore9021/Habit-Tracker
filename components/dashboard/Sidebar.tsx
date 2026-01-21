@@ -8,7 +8,8 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    TrendingUp
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -31,13 +32,19 @@ const navItems = [
     { id: 'habits', label: 'Habits', icon: LayoutDashboard },
     { id: 'routine', label: 'Routine', icon: Calendar },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+    { id: 'analytics', label: 'AI Evolution', icon: TrendingUp },
     { id: 'settings', label: 'Settings', icon: Settings },
 ]
+
+import AchievementsModal from './AchievementsModal'
+
+// ... existing imports
 
 export default function Sidebar({ activeTab, setActiveTab, logout, userId }: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [user, setUser] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [showAchievements, setShowAchievements] = useState(false)
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -72,13 +79,16 @@ export default function Sidebar({ activeTab, setActiveTab, logout, userId }: Sid
 
             {/* User Profile / XP Bar */}
             <div className="px-6 pb-6">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10">
+                <button
+                    onClick={() => setShowAchievements(true)}
+                    className="w-full text-left p-4 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 hover:border-indigo-500/30 hover:bg-white/10 transition-all group"
+                >
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 group-hover:bg-indigo-500/30 transition-colors">
                                 <span className="text-xs font-bold text-indigo-400">LVL</span>
                             </div>
-                            <span className="font-bold text-white text-sm">{user?.level || 1}</span>
+                            <span className="font-bold text-white text-sm group-hover:text-indigo-200 transition-colors">{user?.level || 1}</span>
                         </div>
                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{user?.xp || 0} / {(user?.level || 1) * 100} XP</span>
                     </div>
@@ -90,8 +100,11 @@ export default function Sidebar({ activeTab, setActiveTab, logout, userId }: Sid
                             className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
                         />
                     </div>
-                    <p className="text-[10px] text-gray-500 mt-2 font-medium">Next level in {100 - (user?.xp % 100 || 0)} XP</p>
-                </div>
+                    <p className="text-[10px] text-gray-500 mt-2 font-medium flex items-center justify-between">
+                        <span>Next level in {100 - (user?.xp % 100 || 0)} XP</span>
+                        <span className="text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">View Badges →</span>
+                    </p>
+                </button>
             </div>
 
             <div className="flex-1 px-4 py-4 space-y-2">
@@ -133,6 +146,14 @@ export default function Sidebar({ activeTab, setActiveTab, logout, userId }: Sid
                     <span>Log Out</span>
                 </button>
             </div>
+
+            {userId && (
+                <AchievementsModal
+                    isOpen={showAchievements}
+                    onClose={() => setShowAchievements(false)}
+                    userId={userId}
+                />
+            )}
         </div>
     )
 

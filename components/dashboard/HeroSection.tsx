@@ -75,14 +75,12 @@ export default function HeroSection() {
                                 exit={{ opacity: 0, y: -10 }}
                                 className="text-2xl md:text-4xl font-extrabold text-white leading-tight"
                             >
-                                {parts[0]}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline-block mx-1">
+                                {parts[0]}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline mx-1">
                                     {quote.highlight}
                                     <svg className="absolute w-full h-2 bottom-1 left-0 text-purple-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
                                         <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
                                     </svg>
-                                </span>
-                                {parts[1]}
+                                </span>{parts[1]}
                             </motion.h2>
                         </AnimatePresence>
 
@@ -96,14 +94,7 @@ export default function HeroSection() {
                         </motion.p>
                     </motion.div>
 
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="group flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-white text-indigo-900 font-bold text-sm shadow-2xl shadow-indigo-900/30 hover:bg-indigo-50 transition-all"
-                    >
-                        Start Planning
-                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                    </motion.button>
+                    {/* Start Planning button removed */}
                 </div>
 
                 {/* 3D Visual - Hidden on mobile, shown on md+ */}

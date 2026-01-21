@@ -16,9 +16,10 @@ import HabitGrid from './dashboard/HabitGrid'
 import RoutineGrid from './dashboard/RoutineGrid'
 import TaskGrid from './dashboard/TaskGrid'
 import SettingsView from './dashboard/SettingsView'
+import AnalyticsDashboard from './Analytics/AnalyticsDashboard'
 
 export default function AnimatedDashboard() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'routine' | 'tasks' | 'habits' | 'settings'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'routine' | 'tasks' | 'habits' | 'settings' | 'analytics'>('dashboard')
   const [mounted, setMounted] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [userId, setUserId] = useState<string | null>(null)
@@ -127,6 +128,18 @@ export default function AnimatedDashboard() {
                 className="space-y-6 sm:space-y-10"
               >
                 <SettingsView userId={userId || undefined} />
+              </motion.div>
+            )}
+
+            {activeTab === 'analytics' && (
+              <motion.div
+                key="analytics"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="space-y-6 sm:space-y-10"
+              >
+                <AnalyticsDashboard />
               </motion.div>
             )}
           </AnimatePresence>

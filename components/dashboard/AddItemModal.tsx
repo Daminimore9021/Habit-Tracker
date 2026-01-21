@@ -26,7 +26,8 @@ export default function AddItemModal({ isOpen, onClose, userId, onSuccess, initi
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        time: '09:00 AM',
+        startTime: '09:00',
+        endTime: '10:00',
         date: defaultDate || new Date().toISOString().split('T')[0],
         emoji: '⚡',
         color: 'blue'
@@ -34,7 +35,7 @@ export default function AddItemModal({ isOpen, onClose, userId, onSuccess, initi
     const [translatingField, setTranslatingField] = useState<'title' | 'description' | null>(null)
 
     const translateField = async (field: 'title' | 'description') => {
-        const text = formData[field]
+        const text = formData[field] as string
         if (!text || text.length < 2) return
 
         setTranslatingField(field)
@@ -75,7 +76,8 @@ export default function AddItemModal({ isOpen, onClose, userId, onSuccess, initi
                 body.color = formData.color
             } else if (type === 'routine') {
                 endpoint = '/api/routines'
-                body.time = formData.time
+                // Format time range: "09:00 - 10:00"
+                body.time = `${formData.startTime} - ${formData.endTime}`
             }
 
             const res = await fetch(endpoint, {
@@ -90,7 +92,8 @@ export default function AddItemModal({ isOpen, onClose, userId, onSuccess, initi
                 setFormData({
                     title: '',
                     description: '',
-                    time: '09:00 AM',
+                    startTime: '09:00',
+                    endTime: '10:00',
                     date: defaultDate || new Date().toISOString().split('T')[0],
                     emoji: '⚡',
                     color: 'blue'
@@ -211,18 +214,32 @@ export default function AddItemModal({ isOpen, onClose, userId, onSuccess, initi
                         )}
 
                         {type === 'routine' && (
-                            <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-1">Time</label>
-                                <div className="relative">
-                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.time}
-                                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                        placeholder="e.g. 05:00 AM - 05:15 AM"
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-3 text-white focus:outline-none focus:border-indigo-500/50 transition-all font-medium"
-                                    />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-1">Start Time</label>
+                                    <div className="relative">
+                                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <input
+                                            type="time"
+                                            required
+                                            value={formData.startTime}
+                                            onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-3 text-white focus:outline-none focus:border-indigo-500/50 transition-all font-medium"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] uppercase tracking-widest font-bold text-gray-500 ml-1">End Time</label>
+                                    <div className="relative">
+                                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <input
+                                            type="time"
+                                            required
+                                            value={formData.endTime}
+                                            onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-3 text-white focus:outline-none focus:border-indigo-500/50 transition-all font-medium"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}

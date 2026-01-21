@@ -28,9 +28,20 @@ export default function Navigation() {
     <nav className="glass-card border-b border-white/20 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
-          <Link href="/" className="text-2xl sm:text-3xl font-bold gradient-text hover:scale-105 transition-transform">
-            ✨ Habit Tracker
-          </Link>
+          <div className="flex items-center gap-8">
+            <Link href="/" className="text-2xl sm:text-3xl font-bold gradient-text hover:scale-105 transition-transform">
+              ✨ Habit Tracker
+            </Link>
+            {isAuthenticated && (
+              <Link
+                href="/analytics"
+                className={`text-sm font-medium transition-colors hover:text-blue-600 ${pathname === '/analytics' ? 'text-blue-600 font-bold' : 'text-gray-600'
+                  }`}
+              >
+                AI Evolution 🚀
+              </Link>
+            )}
+          </div>
           {isAuthenticated && (
             <button
               onClick={handleLogout}

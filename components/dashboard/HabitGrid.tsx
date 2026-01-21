@@ -123,6 +123,12 @@ export default function HabitGrid({ userId }: { userId?: string }) {
                 method: 'POST',
                 body: JSON.stringify({ habitId, date: dateStr, completed: !isCompleted, userId })
             })
+
+            // Trigger Badge Check
+            await fetch('/api/badges', {
+                method: 'POST',
+                body: JSON.stringify({ userId, actionContext: { type: 'habit_toggle', date: dateStr } })
+            })
         } catch (e) {
             console.error("Failed to toggle habit", e)
         }
