@@ -10,7 +10,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'userId is required' }, { status: 400 })
         }
 
-        const moods = await (prisma as any).moodLog.findMany({
+        const moods = await prisma.moodLog.findMany({
             where: { userId },
             orderBy: { date: 'desc' },
             take: 30
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'userId is required' }, { status: 400 })
         }
 
-        const mood = await (prisma as any).moodLog.upsert({
+        const mood = await prisma.moodLog.upsert({
             where: {
                 date_userId: {
                     date,

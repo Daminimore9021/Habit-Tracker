@@ -16,6 +16,8 @@ import HabitGrid from './dashboard/HabitGrid'
 import RoutineGrid from './dashboard/RoutineGrid'
 import TaskGrid from './dashboard/TaskGrid'
 import SettingsView from './dashboard/SettingsView'
+import AIChatbot from '@/components/dashboard/AIChatbot'
+import FocusTimer from './dashboard/FocusTimer'
 import AnalyticsDashboard from './Analytics/AnalyticsDashboard'
 
 export default function AnimatedDashboard() {
@@ -51,7 +53,7 @@ export default function AnimatedDashboard() {
       />
 
       <main className="lg:pl-72 min-h-screen transition-all duration-300">
-        <div className="max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-10">
+        <div className="max-w-[1600px] mx-auto p-4 sm:p-8 lg:p-10 space-y-8 sm:space-y-10">
           <Header userId={userId || undefined} />
 
           <AnimatePresence mode="wait">
@@ -74,8 +76,15 @@ export default function AnimatedDashboard() {
                   </div>
                 </div>
 
-                {/* Row 2: Stats */}
-                <StatsOverview userId={userId || undefined} />
+                {/* Row 2: Widgets & Stats */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  <div className="lg:col-span-1 space-y-6">
+                    <FocusTimer />
+                  </div>
+                  <div className="lg:col-span-3">
+                    <StatsOverview userId={userId || undefined} />
+                  </div>
+                </div>
 
                 {/* Row 3: Daily Planner (Unified Habits, Routines, Tasks) */}
                 {/* Pass selectedDate to DailyPlanner */}
@@ -149,6 +158,9 @@ export default function AnimatedDashboard() {
             <p>© 2024 FocusFlow. Designed for excellence.</p>
           </div>
         </div>
+
+        {/* Global Floating AI Chatbot */}
+        <AIChatbot userId={userId || undefined} />
       </main>
     </div>
   )

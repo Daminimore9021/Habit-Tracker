@@ -4,6 +4,7 @@ import { Bell, Search } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import MoodTracker from './MoodTracker'
+
 export default function Header({ userId }: { userId?: string }) {
     const [userName, setUserName] = useState('User')
     const [userAvatar, setUserAvatar] = useState<string | null>(null)
@@ -40,15 +41,15 @@ export default function Header({ userId }: { userId?: string }) {
     const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening'
 
     return (
-        <header className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-6 py-6 px-1">
-            <div className="w-full sm:w-auto">
-                <h1 className="text-3xl font-bold text-white tracking-tight">
+        <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 py-6 px-1">
+            <div className="w-full md:w-auto">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                     {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">{userName}</span>
                 </h1>
-                <p className="text-gray-400 mt-1 text-sm font-medium">{dateStr}</p>
+                <p className="text-gray-400 mt-1 text-xs sm:text-sm font-medium">{dateStr}</p>
             </div>
 
-            <div className="flex flex-col-reverse sm:flex-row items-center gap-6 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full md:w-auto">
                 {/* Mood Tracker */}
                 <MoodTracker userId={userId} />
 

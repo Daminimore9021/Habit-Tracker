@@ -121,29 +121,35 @@ export default function StatsOverview({ userId }: { userId?: string }) {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 items-end relative z-10 pb-8 sm:pb-0">
-                        <ProgressRing
-                            progress={data?.lastWeekProgress || 0}
-                            size={100}
-                            strokeWidth={8}
-                            color="#3b82f6"
-                            label="Last Week"
-                        />
-                        <ProgressRing
-                            progress={data?.thisWeekProgress || 0}
-                            size={120}
-                            strokeWidth={10}
-                            color="#8b5cf6"
-                            label="This Week"
-                            sublabel={data?.thisWeekProgress > 80 ? "Excellent!" : "Keep going!"}
-                        />
-                        <ProgressRing
-                            progress={data?.todayProgress || 0}
-                            size={100}
-                            strokeWidth={8}
-                            color="#06b6d4"
-                            label="Today"
-                        />
+                    <div className="flex flex-row justify-around items-end relative z-10 pb-8 sm:pb-0 gap-2">
+                        <div className="scale-75 sm:scale-100 flex-1 flex justify-center">
+                            <ProgressRing
+                                progress={data?.lastWeekProgress || 0}
+                                size={100}
+                                strokeWidth={8}
+                                color="#3b82f6"
+                                label="Last"
+                            />
+                        </div>
+                        <div className="scale-90 sm:scale-100 flex-1 flex justify-center transform translate-y-[-10px] sm:translate-y-0">
+                            <ProgressRing
+                                progress={data?.thisWeekProgress || 0}
+                                size={120}
+                                strokeWidth={10}
+                                color="#8b5cf6"
+                                label="This Week"
+                                sublabel={data?.thisWeekProgress > 80 ? "EXC!" : "GO!"}
+                            />
+                        </div>
+                        <div className="scale-75 sm:scale-100 flex-1 flex justify-center">
+                            <ProgressRing
+                                progress={data?.todayProgress || 0}
+                                size={100}
+                                strokeWidth={8}
+                                color="#06b6d4"
+                                label="Today"
+                            />
+                        </div>
                     </div>
 
                     {/* Background decoration - empty state by default as requested */}

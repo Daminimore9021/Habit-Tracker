@@ -54,12 +54,14 @@ model HabitLog {
 
 model MoodLog {
   id        String   @id @default(cuid())
-  date      String   @unique // One mood per day
+  date      String   // One mood per day per user
   moodType  String   // great, good, okay, bad, awful
   message   String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  @@unique([date, userId])
 }
 
 model Task {
