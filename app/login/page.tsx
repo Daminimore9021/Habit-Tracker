@@ -55,27 +55,6 @@ export default function Login() {
     }
   }
 
-  const handleDemoLogin = async () => {
-    setError('')
-    setIsLoading(true)
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'admin', password: 'password123' })
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Demo login failed')
-
-      localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('userId', data.id)
-      localStorage.setItem('user', JSON.stringify(data))
-      router.push('/')
-    } catch (err: any) {
-      setError(err.message)
-      setIsLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -210,16 +189,6 @@ export default function Login() {
         </form>
 
         <div className="mt-6 space-y-4 text-center">
-          {isLogin && (
-            <button
-              onClick={handleDemoLogin}
-              disabled={isLoading}
-              className="w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2"
-            >
-              <User className="w-4 h-4" />
-              Demo Login (Admin)
-            </button>
-          )}
 
           <button
             onClick={() => setIsLogin(!isLogin)}
