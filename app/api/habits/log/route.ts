@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import prisma from '@/lib/prisma'
 
 export async function POST(request: Request) {
+    headers()
     try {
         const body = await request.json()
         const { habitId, date, completed, userId } = body

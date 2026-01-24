@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import prisma from '@/lib/prisma'
 import { subDays, format } from 'date-fns'
@@ -6,6 +9,7 @@ import { subDays, format } from 'date-fns'
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERAI_API_KEY || '')
 
 export async function POST(request: Request) {
+    headers()
     try {
         const { message, userId } = await request.json()
 

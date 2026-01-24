@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import prisma from '@/lib/prisma'
 
 export async function GET(request: Request) {
+    headers()
+    console.log('--- Habits API hit [Vercel-Fix-Check] ---')
     try {
         const { searchParams } = new URL(request.url)
         const userId = searchParams.get('userId')
