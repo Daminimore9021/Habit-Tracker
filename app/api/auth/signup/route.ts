@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: Request) {
+    headers()
     try {
         const body = await request.json()
         const { username, password, name } = body
