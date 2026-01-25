@@ -1,16 +1,25 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { motion, useSpring, useMotionValue } from 'framer-motion'
+import { motion, useSpring, useMotionValue, AnimatePresence } from 'framer-motion'
 
 export default function MouseSpotlight() {
     const mouseX = useMotionValue(0)
     const mouseY = useMotionValue(0)
+    const [clicks, setClicks] = useState<{ id: number; x: number; y: number }[]>([])
 
-    // Smooth movement with springs
-    const springConfig = { damping: 25, stiffness: 150 }
-    const spotlightX = useSpring(mouseX, springConfig)
-    const spotlightY = useSpring(mouseY, springConfig)
+    // Physics configuration for the "Antigravity" fluid feel
+    const createSpring = (damping: number, stiffness: number) => ({ damping, stiffness })
+
+    // Multiple points for a smooth, organic trail
+    const points = [
+        { x: useSpring(mouseX, createSpring(30, 200)), y: useSpring(mouseY, createSpring(30, 200)), size: 400, color: 'rgba(59, 130, 246, 0.2)' },
+        { x: useSpring(mouseX, createSpring(40, 150)), y: useSpring(mouseY, createSpring(40, 150)), size: 300, color: 'rgba(139, 92, 246, 0.15)' },
+        { x: useSpring(mouseX, createSpring(50, 100)), y: useSpring(mouseY, createSpring(50, 100)), size: 200, color: 'rgba(59, 130, 246, 0.1)' }
+    ]
+
+    const cursorDotX = useSpring(mouseX, createSpring(20, 400))
+    const cursorDotY = useSpring(mouseY, createSpring(20, 400))
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -18,51 +27,88 @@ export default function MouseSpotlight() {
             mouseY.set(e.clientY)
         }
 
+        const handleClick = (e: MouseEvent) => {
+            const id = Date.now()
+            setClicks(prev => [...prev, { id, x: e.clientX, y: e.clientY }])
+            setTimeout(() => {
+                setClicks(prev => prev.filter(c => c.id !== id))
+            }, 1000)
+        }
+
         window.addEventListener('mousemove', handleMouseMove)
-        return () => window.removeEventListener('mousemove', handleMouseMove)
+        window.addEventListener('click', handleClick)
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('click', handleClick)
+        }
     }, [mouseX, mouseY])
 
     return (
         <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
-            {/* Primary Large Glow */}
+            {/* Organic Fluid Trail */}
+            {points.map((point, i) => (
+                <motion.div
+                    key={i}
+                    className="absolute rounded-full blur-[80px]"
+                    style={{
+                        x: point.x,
+                        y: point.y,
+                        width: point.size,
+                        height: point.size,
+                        left: -point.size / 2,
+                        top: -point.size / 2,
+                        backgroundColor: point.color,
+                        zIndex: 10 - i
+                    }}
+                />
+            ))}
+
+            {/* Sharp Lead Point */}
             <motion.div
-                className="absolute w-[1000px] h-[1000px] rounded-full blur-[150px] opacity-40 bg-blue-500/20"
+                className="absolute w-1.5 h-1.5 bg-blue-400 rounded-full blur-[1px] opacity-80"
                 style={{
-                    x: spotlightX,
-                    y: spotlightY,
-                    left: -500,
-                    top: -500,
+                    x: cursorDotX,
+                    y: cursorDotY,
+                    left: -3,
+                    top: -3,
                 }}
             />
 
-            {/* Secondary Sharper Glow */}
+            {/* Inner Glow Core */}
             <motion.div
-                className="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-30 bg-purple-500/30"
+                className="absolute w-32 h-32 bg-white/10 rounded-full blur-2xl"
                 style={{
-                    x: spotlightX,
-                    y: spotlightY,
-                    left: -200,
-                    top: -200,
+                    x: cursorDotX,
+                    y: cursorDotY,
+                    left: -64,
+                    top: -64,
                 }}
             />
 
-            {/* Central Cursor Point */}
-            <motion.div
-                className="absolute w-2 h-2 bg-blue-400 rounded-full blur-[2px] opacity-60"
-                style={{
-                    x: spotlightX,
-                    y: spotlightY,
-                    left: -4,
-                    top: -4,
-                }}
-            />
+            {/* Interactive Click Shockwaves */}
+            <AnimatePresence>
+                {clicks.map(click => (
+                    <motion.div
+                        key={click.id}
+                        initial={{ scale: 0, opacity: 0.5 }}
+                        animate={{ scale: 4, opacity: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="absolute w-40 h-40 border border-blue-500/30 rounded-full"
+                        style={{
+                            left: click.x - 80,
+                            top: click.y - 80,
+                        }}
+                    />
+                ))}
+            </AnimatePresence>
 
-            {/* Interactive Grid Overlay */}
+            {/* Deep Background Grid that slightly reacts */}
             <div
-                className="absolute inset-0 opacity-[0.05]"
+                className="absolute inset-0 opacity-[0.07]"
                 style={{
-                    backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-                    backgroundSize: '40px 40px'
+                    backgroundImage: `radial-gradient(circle at 1.5px 1.5px, #3b82f6 1px, transparent 0)`,
+                    backgroundSize: '48px 48px'
                 }}
             />
         </div>
