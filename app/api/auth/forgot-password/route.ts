@@ -35,8 +35,8 @@ export async function POST(request: Request) {
         })
 
         // Send email
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-        const resetLink = `${appUrl}/reset-password?token=${resetToken}`
+        const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+        const resetLink = `${origin}/reset-password?token=${resetToken}`
 
         await resend.emails.send({
             from: 'FocusFlow <onboarding@resend.dev>', // Update this after domain verification
