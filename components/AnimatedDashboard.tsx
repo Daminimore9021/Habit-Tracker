@@ -82,13 +82,12 @@ export default function AnimatedDashboard() {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, margin: "-100px" }}
-                  className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10"
+                  className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10 items-stretch"
                 >
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-2 h-full">
                     <HeroSection />
                   </div>
                   <div className="lg:col-span-1 h-full">
-                    {/* Pass selectedDate and handler to CalendarWidget */}
                     <CalendarWidget selectedDate={selectedDate} onSelect={setSelectedDate} />
                   </div>
                 </motion.div>

@@ -40,8 +40,15 @@ export default function HeroSection() {
 
     const parts = quote.text.split(quote.highlight)
 
+    // Dynamic text sizing based on length
+    const getFontSize = (text: string) => {
+        if (text.length > 100) return "text-xl md:text-2xl"
+        if (text.length > 60) return "text-2xl md:text-3xl"
+        return "text-2xl md:text-4xl"
+    }
+
     return (
-        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-white/5 shadow-2xl">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-white/5 shadow-2xl h-full min-h-[350px] flex items-center">
             {/* Dynamic Background */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/20 blur-[100px] rounded-full mix-blend-screen" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/20 blur-[80px] rounded-full mix-blend-screen" />
@@ -73,7 +80,7 @@ export default function HeroSection() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="text-2xl md:text-4xl font-extrabold text-white leading-tight"
+                                className={`${getFontSize(quote.text)} font-extrabold text-white leading-tight`}
                             >
                                 {parts[0]}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline mx-1">
                                     {quote.highlight}
