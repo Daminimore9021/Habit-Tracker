@@ -2,6 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import MouseSpotlight from './MouseSpotlight'
+
+const scrollFadeVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" as any }
+  }
+}
 
 // Layout Components
 import Sidebar from './dashboard/Sidebar'
@@ -44,7 +54,8 @@ export default function AnimatedDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-indigo-500/30 relative">
+      <MouseSpotlight />
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab as any}
@@ -66,7 +77,13 @@ export default function AnimatedDashboard() {
                 className="space-y-6 sm:space-y-10"
               >
                 {/* Row 1: Hero + Calendar */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10">
+                <motion.div
+                  variants={scrollFadeVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                  className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10"
+                >
                   <div className="lg:col-span-2">
                     <HeroSection />
                   </div>
@@ -74,21 +91,33 @@ export default function AnimatedDashboard() {
                     {/* Pass selectedDate and handler to CalendarWidget */}
                     <CalendarWidget selectedDate={selectedDate} onSelect={setSelectedDate} />
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Row 2: Widgets & Stats */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <motion.div
+                  variants={scrollFadeVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                  className="grid grid-cols-1 lg:grid-cols-4 gap-6"
+                >
                   <div className="lg:col-span-1 space-y-6">
                     <FocusTimer />
                   </div>
                   <div className="lg:col-span-3">
                     <StatsOverview userId={userId || undefined} />
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Row 3: Daily Planner (Unified Habits, Routines, Tasks) */}
-                {/* Pass selectedDate to DailyPlanner */}
-                <DailyPlanner selectedDate={selectedDate} userId={userId || undefined} />
+                <motion.div
+                  variants={scrollFadeVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                >
+                  <DailyPlanner selectedDate={selectedDate} userId={userId || undefined} />
+                </motion.div>
               </motion.div>
             )}
 
@@ -100,7 +129,14 @@ export default function AnimatedDashboard() {
                 exit={{ opacity: 0, y: 10 }}
                 className="space-y-6 sm:space-y-10"
               >
-                <HabitGrid userId={userId || undefined} />
+                <motion.div
+                  variants={scrollFadeVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                >
+                  <HabitGrid userId={userId || undefined} />
+                </motion.div>
               </motion.div>
             )}
 
@@ -112,7 +148,14 @@ export default function AnimatedDashboard() {
                 exit={{ opacity: 0, y: 10 }}
                 className="space-y-6 sm:space-y-10"
               >
-                <RoutineGrid userId={userId || undefined} />
+                <motion.div
+                  variants={scrollFadeVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                >
+                  <RoutineGrid userId={userId || undefined} />
+                </motion.div>
               </motion.div>
             )}
 
@@ -124,7 +167,14 @@ export default function AnimatedDashboard() {
                 exit={{ opacity: 0, y: 10 }}
                 className="space-y-6 sm:space-y-10"
               >
-                <TaskGrid userId={userId || undefined} />
+                <motion.div
+                  variants={scrollFadeVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                >
+                  <TaskGrid userId={userId || undefined} />
+                </motion.div>
               </motion.div>
             )}
 

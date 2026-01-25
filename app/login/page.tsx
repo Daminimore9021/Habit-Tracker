@@ -4,6 +4,23 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import MouseSpotlight from '@/components/MouseSpotlight'
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+}
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true)
@@ -142,6 +159,8 @@ export default function Login() {
           </motion.p>
         </div>
 
+        <MouseSpotlight />
+
         {error && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -163,8 +182,14 @@ export default function Login() {
         )}
 
         {isForgotPassword ? (
-          <form onSubmit={handleForgotPassword} className="space-y-4">
-            <div className="space-y-1">
+          <motion.form
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            onSubmit={handleForgotPassword}
+            className="space-y-4"
+          >
+            <motion.div variants={itemVariants} className="space-y-1">
               <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Email Address</label>
               <div className="relative group">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
@@ -177,9 +202,10 @@ export default function Login() {
                   required
                 />
               </div>
-            </div>
+            </motion.div>
 
             <motion.button
+              variants={itemVariants}
               type="submit"
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
@@ -196,7 +222,7 @@ export default function Login() {
               )}
             </motion.button>
 
-            <div className="text-center mt-4">
+            <motion.div variants={itemVariants} className="text-center mt-4">
               <button
                 type="button"
                 onClick={() => setIsForgotPassword(false)}
@@ -204,10 +230,16 @@ export default function Login() {
               >
                 Back to Login
               </button>
-            </div>
-          </form>
+            </motion.div>
+          </motion.form>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <motion.form
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             {!isLogin && (
               <>
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
@@ -227,7 +259,7 @@ export default function Login() {
 
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
                   <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Email Address</label>
-                  <div className="relative group">
+                  <motion.div variants={itemVariants} className="relative group">
                     {/* Reuse User icon for email or find another if needed */}
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
                     <input
@@ -238,12 +270,12 @@ export default function Login() {
                       placeholder="Enter your email"
                       required={!isLogin}
                     />
-                  </div>
+                  </motion.div>
                 </motion.div>
               </>
             )}
 
-            <div className="space-y-1">
+            <motion.div variants={itemVariants} className="space-y-1">
               <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Username</label>
               <div className="relative group">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
@@ -256,9 +288,9 @@ export default function Login() {
                   required
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div className="space-y-1">
+            <motion.div variants={itemVariants} className="space-y-1">
               <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Password</label>
               <div className="relative group">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
@@ -282,9 +314,10 @@ export default function Login() {
                   )}
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             <motion.button
+              variants={itemVariants}
               type="submit"
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
@@ -300,7 +333,7 @@ export default function Login() {
                 </>
               )}
             </motion.button>
-          </form>
+          </motion.form>
         )}
 
         {!isForgotPassword && (

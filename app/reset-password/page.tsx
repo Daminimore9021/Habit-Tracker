@@ -4,6 +4,21 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import MouseSpotlight from '@/components/MouseSpotlight'
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: "easeOut" as any }
+    }
+}
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+}
 
 function ResetPasswordForm() {
     const [password, setPassword] = useState('')
@@ -100,9 +115,17 @@ function ResetPasswordForm() {
                 </div>
             )}
 
+            <MouseSpotlight />
+
             {!success && (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-1">
+                <motion.form
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    onSubmit={handleSubmit}
+                    className="space-y-4"
+                >
+                    <motion.div variants={itemVariants} className="space-y-1">
                         <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">New Password</label>
                         <div className="relative group">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
@@ -122,9 +145,9 @@ function ResetPasswordForm() {
                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="space-y-1">
+                    <motion.div variants={itemVariants} className="space-y-1">
                         <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Confirm Password</label>
                         <div className="relative group">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
@@ -137,9 +160,10 @@ function ResetPasswordForm() {
                                 required
                             />
                         </div>
-                    </div>
+                    </motion.div>
 
                     <motion.button
+                        variants={itemVariants}
                         type="submit"
                         disabled={isLoading}
                         whileHover={{ scale: 1.02 }}
@@ -155,7 +179,7 @@ function ResetPasswordForm() {
                             </>
                         )}
                     </motion.button>
-                </form>
+                </motion.form>
             )}
         </motion.div>
     )
