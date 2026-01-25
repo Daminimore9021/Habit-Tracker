@@ -10,9 +10,13 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [isForgotPassword, setIsForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -25,11 +29,12 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
     setIsLoading(true)
 
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup'
-      const payload = isLogin ? { username, password } : { username, password, name }
+      const payload = isLogin ? { username, password } : { username, password, name, email }
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -44,10 +49,44 @@ export default function Login() {
       }
 
       // Success
-      localStorage.setItem('isAuthenticated', 'true')
-      localStorage.setItem('userId', data.id)
-      localStorage.setItem('user', JSON.stringify(data))
-      router.push('/')
+      if (isLogin) {
+        localStorage.setItem('isAuthenticated', 'true')
+        localStorage.setItem('userId', data.id)
+        localStorage.setItem('user', JSON.stringify(data))
+        router.push('/')
+      } else {
+        setSuccess('Account created successfully! Please sign in.')
+        setIsLogin(true)
+        setPassword('')
+      }
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setSuccess('')
+    setIsLoading(true)
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send reset link')
+      }
+
+      setSuccess('Password reset link sent to your email!')
+      setIsForgotPassword(false)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -94,10 +133,12 @@ export default function Login() {
             <Lock className="w-8 h-8 text-blue-500" />
           </motion.div>
           <motion.h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {isForgotPassword ? 'Reset Password' : (isLogin ? 'Welcome Back' : 'Create Account')}
           </motion.h1>
           <motion.p className="text-gray-400 mt-2 text-sm">
-            {isLogin ? 'Enter your credentials to access your workspace' : 'Join FocusFlow and start your journey today'}
+            {isForgotPassword
+              ? 'Enter your email to receive a password reset link'
+              : (isLogin ? 'Enter your credentials to access your workspace' : 'Join FocusFlow and start your journey today')}
           </motion.p>
         </div>
 
@@ -111,93 +152,183 @@ export default function Login() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
-              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Full Name</label>
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mb-6 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold text-center"
+          >
+            {success}
+          </motion.div>
+        )}
+
+        {isForgotPassword ? (
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Email Address</label>
+              <div className="relative group">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+            </div>
+
+            <motion.button
+              type="submit"
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-70 mt-6"
+            >
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  Send Reset Link
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </motion.button>
+
+            <div className="text-center mt-4">
+              <button
+                type="button"
+                onClick={() => setIsForgotPassword(false)}
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                Back to Login
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <>
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Full Name</label>
+                  <div className="relative group">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-black/20 border border-white/10 rounded-xl px-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                      placeholder="Enter your name"
+                      required={!isLogin}
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Email Address</label>
+                  <div className="relative group">
+                    {/* Reuse User icon for email or find another if needed */}
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-black/20 border border-white/10 rounded-xl px-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                      placeholder="Enter your email"
+                      required={!isLogin}
+                    />
+                  </div>
+                </motion.div>
+              </>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Username</label>
               <div className="relative group">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-black/20 border border-white/10 rounded-xl px-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                  placeholder="Enter your name"
-                  required={!isLogin}
+                  placeholder="Choose a username"
+                  required
                 />
               </div>
-            </motion.div>
-          )}
-
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Username</label>
-            <div className="relative group">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl px-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                placeholder="Choose a username"
-                required
-              />
             </div>
-          </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Password</label>
-            <div className="relative group">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl px-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                placeholder="••••••••"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 transition-colors"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
-              </button>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Password</label>
+              <div className="relative group">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <motion.button
-            type="submit"
-            disabled={isLoading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-70 mt-6"
-          >
-            {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <>
-                {isLogin ? 'Sign In' : 'Create Account'}
-                <ArrowRight className="w-4 h-4" />
-              </>
+            <motion.button
+              type="submit"
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all disabled:opacity-70 mt-6"
+            >
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  {isLogin ? 'Sign In' : 'Create Account'}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </motion.button>
+          </form>
+        )}
+
+        {!isForgotPassword && (
+          <div className="mt-6 space-y-4 text-center">
+            {isLogin && (
+              <div>
+                <button
+                  onClick={() => setIsForgotPassword(true)}
+                  className="text-xs text-blue-500 hover:text-blue-400 font-medium transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
             )}
-          </motion.button>
-        </form>
 
-        <div className="mt-6 space-y-4 text-center">
-
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-gray-400 hover:text-white transition-colors"
-          >
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <span className="text-blue-500 font-bold ml-1">{isLogin ? 'Sign Up' : 'Sign In'}</span>
-          </button>
-        </div>
+            <button
+              onClick={() => {
+                setIsLogin(!isLogin)
+                setSuccess('')
+                setError('')
+              }}
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <span className="text-blue-500 font-bold ml-1">{isLogin ? 'Sign Up' : 'Sign In'}</span>
+            </button>
+          </div>
+        )}
       </motion.div>
     </div>
   )

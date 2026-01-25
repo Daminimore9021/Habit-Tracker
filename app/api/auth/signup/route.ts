@@ -9,19 +9,25 @@ export async function POST(request: Request) {
     headers()
     try {
         const body = await request.json()
-        const { username, password, name } = body
+        const { username, password, name, email } = body
 
-        if (!username || !password) {
-            return NextResponse.json({ error: 'Username and password are required' }, { status: 400 })
+        if (!username || !password || !email) {
+            return NextResponse.json({ error: 'Username, password, and email are required' }, { status: 400 })
         }
 
-        // Check if user already exists
-        const existingUser = await (prisma as any).user.findUnique({
-            where: { username }
+        // Check if user already exists (username or email)
+        const existingUser = await (prisma as any).user.findFirst({
+            where: {
+                OR: [
+                    { username },
+                    { email }
+                ]
+            }
         })
 
         if (existingUser) {
-            return NextResponse.json({ error: 'Username already exists' }, { status: 400 })
+            const field = existingUser.username === username ? 'Username' : 'Email'
+            return NextResponse.json({ error: `${field} already exists` }, { status: 400 })
         }
 
         // Hash password
@@ -31,6 +37,7 @@ export async function POST(request: Request) {
         const user = await (prisma as any).user.create({
             data: {
                 username,
+                email,
                 password: hashedPassword,
                 name: name || username,
                 level: 1,

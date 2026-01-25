@@ -11,16 +11,19 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  username  String?   @unique
-  password  String?
-  name      String    @default("User")
-  avatar    String?   // Base64 string or URL
-  level     Int       @default(1)
-  xp        Int       @default(0)
-  totalXp   Int       @default(0)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  username        String?   @unique
+  email           String?   @unique
+  password        String?
+  resetToken      String?   @unique
+  resetTokenExpiry DateTime?
+  name            String    @default("User")
+  avatar          String?   // Base64 string or URL
+  level           Int       @default(1)
+  xp              Int       @default(0)
+  totalXp         Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   habits    Habit[]
   moods     MoodLog[]
   tasks     Task[]
