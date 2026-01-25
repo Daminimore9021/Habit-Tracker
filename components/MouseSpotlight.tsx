@@ -23,33 +23,43 @@ export default function MouseSpotlight() {
     }, [mouseX, mouseY])
 
     return (
-        <div className="fixed inset-0 pointer-events-none z-30 overflow-hidden">
-            {/* Main Spotlight Glow */}
+        <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+            {/* Primary Large Glow */}
             <motion.div
-                className="absolute w-[800px] h-[800px] rounded-full blur-[120px] opacity-20 bg-blue-500/30"
+                className="absolute w-[1000px] h-[1000px] rounded-full blur-[150px] opacity-40 bg-blue-500/20"
                 style={{
                     x: spotlightX,
                     y: spotlightY,
-                    left: -400,
-                    top: -400,
+                    left: -500,
+                    top: -500,
                 }}
             />
 
-            {/* Subtle Purple Counter-glow */}
+            {/* Secondary Sharper Glow */}
             <motion.div
-                className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-10 bg-purple-500/20"
+                className="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-30 bg-purple-500/30"
                 style={{
                     x: spotlightX,
                     y: spotlightY,
-                    left: -300,
-                    top: -300,
-                    transitionDelay: '0.1s'
+                    left: -200,
+                    top: -200,
+                }}
+            />
+
+            {/* Central Cursor Point */}
+            <motion.div
+                className="absolute w-2 h-2 bg-blue-400 rounded-full blur-[2px] opacity-60"
+                style={{
+                    x: spotlightX,
+                    y: spotlightY,
+                    left: -4,
+                    top: -4,
                 }}
             />
 
             {/* Interactive Grid Overlay */}
             <div
-                className="absolute inset-0 opacity-[0.03]"
+                className="absolute inset-0 opacity-[0.05]"
                 style={{
                     backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
                     backgroundSize: '40px 40px'
