@@ -40,15 +40,18 @@ export default function HeroSection() {
 
     const parts = quote.text.split(quote.highlight)
 
-    // Dynamic text sizing based on length
+    // Aggressive dynamic text sizing to keep card size fixed
     const getFontSize = (text: string) => {
-        if (text.length > 100) return "text-xl md:text-2xl"
-        if (text.length > 60) return "text-2xl md:text-3xl"
-        return "text-2xl md:text-4xl"
+        const len = text.length
+        if (len > 150) return "text-sm md:text-lg"
+        if (len > 100) return "text-lg md:text-xl"
+        if (len > 80) return "text-xl md:text-2xl"
+        if (len > 60) return "text-2xl md:text-3xl"
+        return "text-3xl md:text-4xl"
     }
 
     return (
-        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-white/5 shadow-2xl h-full min-h-[350px] flex items-center">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-white/5 shadow-2xl h-[350px] flex items-center">
             {/* Dynamic Background */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/20 blur-[100px] rounded-full mix-blend-screen" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/20 blur-[80px] rounded-full mix-blend-screen" />
@@ -95,7 +98,7 @@ export default function HeroSection() {
                             key={quote.author}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="text-slate-400 mt-4 text-sm md:text-base font-medium italic opacity-80"
+                            className="text-slate-400 mt-2 text-xs md:text-sm font-medium italic opacity-80"
                         >
                             — {quote.author}
                         </motion.p>
