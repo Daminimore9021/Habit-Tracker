@@ -70,11 +70,22 @@ Current Stats:
 - Recent Task Completion Rate (Last 7 days): ${taskCompletionRate}% (${completedTasks}/${totalTasks} tasks)
 - Recent Habit Check-ins: ${habitLogsCount} in the last 7 days.
 
+[ACTION MODE]
+You can help the user by creating tasks or habits directly. 
+To perform an action, append exactly one of the following JSON blocks to the end of your message (after the conversational part):
+
+For a new task:
+[ACTION:CREATE_TASK:{"title": "Task Name", "description": "Optional description"}]
+
+For a new habit:
+[ACTION:CREATE_HABIT:{"title": "Habit Name", "emoji": "🔥", "description": "Optional description"}]
+
 Rules:
 1. Always be supportive.
 2. If the user asks about performance, use the stats above.
 3. Keep responses concise and formatted with markdown.
-4. If a user asks a question unrelated to productivity or the app, answer politely but try to bring it back to their goals.`
+4. Only use Action blocks if the user explicitly asks to add or schedule something.
+5. If a user asks a question unrelated to productivity, answer politely but bring it back to goals.`
 
         // 3. Initialize Gemini
         const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
@@ -84,9 +95,8 @@ Rules:
             history: [
                 { role: 'user', parts: [{ text: "Hello, who are you?" }] },
                 { role: 'model', parts: [{ text: "I am your FocusFlow AI coach. I'm here to help you stay productive and reach your goals!" }] },
-                // Add system context as a primer
                 { role: 'user', parts: [{ text: `System Context: ${systemPrompt}` }] },
-                { role: 'model', parts: [{ text: "Understood. I have access to the user's data and will provide personalized guidance." }] },
+                { role: 'model', parts: [{ text: "Understood. I have access to the user's data and can perform actions to help them stay organized." }] },
                 ...(history || []).map((msg: any) => ({
                     role: msg.role === 'user' ? 'user' : 'model',
                     parts: [{ text: msg.content }]
@@ -96,7 +106,43 @@ Rules:
 
         const result = await chat.sendMessage(message)
         const response = await result.response
-        const text = response.text()
+        let text = response.text()
+
+        // 5. Action Execution Logic
+        const actionRegex = /\[ACTION:(CREATE_TASK|CREATE_HABIT):(\{.*?\})\]/
+        const match = text.match(actionRegex)
+
+        if (match) {
+            const actionType = match[1]
+            const actionData = JSON.parse(match[2])
+
+            console.log(`AI triggering action: ${actionType}`, actionData)
+
+            if (actionType === 'CREATE_TASK') {
+                await (prisma as any).task.create({
+                    data: {
+                        title: actionData.title,
+                        description: actionData.description || '',
+                        userId,
+                        date: format(new Date(), 'yyyy-MM-dd'),
+                        completed: false
+                    }
+                })
+            } else if (actionType === 'CREATE_HABIT') {
+                await prisma.habit.create({
+                    data: {
+                        title: actionData.title,
+                        emoji: actionData.emoji || '🔥',
+                        description: actionData.description || '',
+                        userId
+                    }
+                })
+            }
+
+            // Remove the action tag from the visible text for the user
+            text = text.replace(actionRegex, '').trim()
+            if (!text) text = `Done! I've added that ${actionType === 'CREATE_TASK' ? 'task' : 'habit'} for you.`
+        }
 
         return NextResponse.json({ content: text })
 

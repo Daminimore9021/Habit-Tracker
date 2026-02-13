@@ -59,7 +59,31 @@ export async function POST(request: Request) {
         })
 
         return NextResponse.json(updatedUser)
+        return NextResponse.json(updatedUser)
     } catch (error: any) {
         return NextResponse.json({ error: error.message || 'Failed to update XP' }, { status: 500 })
+    }
+}
+
+export async function PATCH(request: Request) {
+    try {
+        const body = await request.json()
+        const { name, avatar, userId } = body
+
+        if (!userId) {
+            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                ...(name && { name }),
+                ...(avatar !== undefined && { avatar })
+            }
+        })
+
+        return NextResponse.json(updatedUser)
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message || 'Failed to update profile' }, { status: 500 })
     }
 }

@@ -28,6 +28,7 @@ import TaskGrid from './dashboard/TaskGrid'
 import SettingsView from './dashboard/SettingsView'
 import FocusTimer from './dashboard/FocusTimer'
 import AnalyticsDashboard from './Analytics/AnalyticsDashboard'
+import OnboardingTour from './dashboard/OnboardingTour'
 
 export default function AnimatedDashboard() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'routine' | 'tasks' | 'habits' | 'settings' | 'analytics'>('dashboard')
@@ -214,6 +215,7 @@ export default function AnimatedDashboard() {
           </div>
         </div>
       </main>
+      <OnboardingTour />
     </div>
   )
 }

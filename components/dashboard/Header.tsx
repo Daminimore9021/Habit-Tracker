@@ -1,21 +1,31 @@
 'use client'
 
-import { Bell, Search } from 'lucide-react'
+import { Bell, Search, Settings } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import MoodTracker from './MoodTracker'
+import SettingsModal from './SettingsModal'
 
 export default function Header({ userId, userData }: { userId?: string, userData?: any }) {
     const [userName, setUserName] = useState('User')
     const [userAvatar, setUserAvatar] = useState<string | null>(null)
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+    const [currentUser, setCurrentUser] = useState(userData)
     const today = new Date()
 
     useEffect(() => {
         if (userData) {
+            setCurrentUser(userData)
             if (userData.name) setUserName(userData.name)
             if (userData.avatar) setUserAvatar(userData.avatar)
         }
     }, [userData])
+
+    const handleUpdate = (newData: any) => {
+        setCurrentUser(newData)
+        setUserName(newData.name)
+        setUserAvatar(newData.avatar)
+    }
 
     const dateStr = today.toLocaleDateString('en-US', {
         weekday: 'long',
@@ -51,15 +61,25 @@ export default function Header({ userId, userData }: { userId?: string, userData
                         />
                     </div>
 
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 p-[2px]">
+                    <button
+                        onClick={() => setIsSettingsOpen(true)}
+                        className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 p-[2px] hover:scale-110 transition-transform active:scale-95 shadow-lg shadow-indigo-500/20"
+                    >
                         <img
                             src={userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`}
                             alt="Profile"
                             className="rounded-full bg-black h-full w-full object-cover"
                         />
-                    </div>
+                    </button>
                 </div>
             </div>
+
+            <SettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                userData={currentUser}
+                onUpdate={handleUpdate}
+            />
         </header>
     )
 }
