@@ -8,6 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -82,11 +83,22 @@ model Routine {
   id        String   @id @default(cuid())
   title     String
   time      String   // e.g. "5:00 - 5:15"
-  completed Boolean  @default(false) // Static baseline completion or usage?
+  completed Boolean  @default(false) // Baseline default
   order     Int      @default(0)
   description String?
   userId      String
   user        User     @relation(fields: [userId], references: [id])
+  logs        RoutineLog[]
+}
+
+model RoutineLog {
+  id        String   @id @default(cuid())
+  date      String   // YYYY-MM-DD
+  routineId String
+  routine   Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([date, routineId])
 }
 
 model UserBadge {

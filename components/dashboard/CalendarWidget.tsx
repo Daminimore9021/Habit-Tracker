@@ -67,7 +67,7 @@ export default function CalendarWidget({ selectedDate, onSelect }: CalendarWidge
     }
 
     return (
-        <div className="bg-[#050505] rounded-[2rem] p-6 border border-[#2a2a30] w-full flex flex-col justify-start min-h-[350px]">
+        <div className="bg-[#050505] rounded-[2rem] p-4 sm:p-6 border border-[#2a2a30] w-full flex flex-col justify-start min-h-0 md:min-h-[350px]">
             <div className="flex items-center justify-between mb-8 sm:mb-6">
                 <h3 className="font-bold text-white text-lg">
                     {monthNames[month]} {year}
@@ -89,17 +89,15 @@ export default function CalendarWidget({ selectedDate, onSelect }: CalendarWidge
             </div>
 
             <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                    <div key={day} className="text-[10px] font-bold text-gray-500 uppercase">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                    <div key={`${day}-${index}`} className="text-[10px] font-bold text-gray-500 uppercase">
                         {day}
                     </div>
                 ))}
             </div>
 
             <div className="grid grid-cols-7 gap-y-3 gap-x-1 place-items-center flex-1 content-start">
-                <AnimatePresence mode="wait">
-                    {calendarDays}
-                </AnimatePresence>
+                {calendarDays}
             </div>
         </div>
     )

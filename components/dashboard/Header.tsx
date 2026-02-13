@@ -5,31 +5,17 @@ import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import MoodTracker from './MoodTracker'
 
-export default function Header({ userId }: { userId?: string }) {
+export default function Header({ userId, userData }: { userId?: string, userData?: any }) {
     const [userName, setUserName] = useState('User')
     const [userAvatar, setUserAvatar] = useState<string | null>(null)
     const today = new Date()
 
     useEffect(() => {
-        const fetchUser = async () => {
-            if (!userId) return
-            try {
-                const res = await fetch(`/api/user?userId=${userId}`)
-                if (res.status === 404) {
-                    console.warn("User not found, logging out");
-                    localStorage.clear();
-                    window.location.href = '/login';
-                    return;
-                }
-                const data = await res.json()
-                if (data.name) setUserName(data.name)
-                if (data.avatar) setUserAvatar(data.avatar)
-            } catch (e) {
-                console.error("Failed to fetch user", e)
-            }
+        if (userData) {
+            if (userData.name) setUserName(userData.name)
+            if (userData.avatar) setUserAvatar(userData.avatar)
         }
-        fetchUser()
-    }, [userId])
+    }, [userData])
 
     const dateStr = today.toLocaleDateString('en-US', {
         weekday: 'long',

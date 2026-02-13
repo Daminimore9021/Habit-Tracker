@@ -9,13 +9,17 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
         const userId = searchParams.get('userId')
+        const date = searchParams.get('date') // Optional: to filter logs in the future
 
         if (!userId) {
             return NextResponse.json({ error: 'userId is required' }, { status: 400 })
         }
 
-        const routines = await (prisma as any).routine.findMany({
+        const routines = await prisma.routine.findMany({
             where: { userId },
+            include: {
+                logs: date ? { where: { date } } : true
+            },
             orderBy: { order: 'asc' }
         })
 
@@ -34,7 +38,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'userId is required' }, { status: 400 })
         }
 
-        const routine = await (prisma as any).routine.create({
+        const routine = await prisma.routine.create({
             data: {
                 title,
                 time,
@@ -54,12 +58,35 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
     try {
         const body = await request.json()
-        const { id, completed, userId } = body
+        const { id, completed, userId, date } = body
 
-        const routine = await (prisma as any).routine.update({
-            where: { id },
-            data: { completed }
-        })
+        if (!date) {
+            return NextResponse.json({ error: 'Date is required for routine tracking' }, { status: 400 })
+        }
+
+        let routineLog
+        if (completed) {
+            routineLog = await prisma.routineLog.upsert({
+                where: {
+                    date_routineId: {
+                        date,
+                        routineId: id
+                    }
+                },
+                update: {},
+                create: {
+                    date,
+                    routineId: id
+                }
+            })
+        } else {
+            await prisma.routineLog.deleteMany({
+                where: {
+                    date,
+                    routineId: id
+                }
+            })
+        }
 
         // Award XP if completed
         if (completed && userId) {
@@ -69,7 +96,7 @@ export async function PATCH(request: Request) {
             })
         }
 
-        return NextResponse.json(routine)
+        return NextResponse.json({ success: true, completed })
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }

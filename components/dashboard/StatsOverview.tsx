@@ -86,7 +86,8 @@ export default function StatsOverview({ userId }: { userId?: string }) {
 
     useEffect(() => {
         fetchStats()
-        const interval = setInterval(fetchStats, 5000)
+        // Poll every 60 seconds instead of every 5 seconds to reduce load
+        const interval = setInterval(fetchStats, 60000)
         return () => clearInterval(interval)
     }, [userId])
 
@@ -121,8 +122,8 @@ export default function StatsOverview({ userId }: { userId?: string }) {
                         </button>
                     </div>
 
-                    <div className="flex flex-row justify-around items-end relative z-10 pb-8 sm:pb-0 gap-2">
-                        <div className="scale-75 sm:scale-100 flex-1 flex justify-center">
+                    <div className="flex flex-row justify-around items-end relative z-10 pb-4 sm:pb-0 gap-1 sm:gap-2">
+                        <div className="scale-[0.85] sm:scale-100 flex-1 flex justify-center">
                             <ProgressRing
                                 progress={data?.lastWeekProgress || 0}
                                 size={100}
@@ -131,7 +132,7 @@ export default function StatsOverview({ userId }: { userId?: string }) {
                                 label="Last"
                             />
                         </div>
-                        <div className="scale-90 sm:scale-100 flex-1 flex justify-center transform translate-y-[-10px] sm:translate-y-0">
+                        <div className="scale-95 sm:scale-100 flex-1 flex justify-center transform translate-y-[-5px] sm:translate-y-0">
                             <ProgressRing
                                 progress={data?.thisWeekProgress || 0}
                                 size={120}
@@ -141,7 +142,7 @@ export default function StatsOverview({ userId }: { userId?: string }) {
                                 sublabel={data?.thisWeekProgress > 80 ? "EXC!" : "GO!"}
                             />
                         </div>
-                        <div className="scale-75 sm:scale-100 flex-1 flex justify-center">
+                        <div className="scale-[0.85] sm:scale-100 flex-1 flex justify-center">
                             <ProgressRing
                                 progress={data?.todayProgress || 0}
                                 size={100}

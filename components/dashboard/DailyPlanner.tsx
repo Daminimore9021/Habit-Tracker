@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Check, Plus, Loader2, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AddItemModal from './AddItemModal'
@@ -27,6 +27,8 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
 
     const dateStr = selectedDate.toISOString().split('T')[0]
 
+    const lastFetch = useRef(dateStr + userId)
+
     const fetchData = async () => {
         if (!userId) return
         setLoading(true)
@@ -35,7 +37,7 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
             const [habitsRes, tasksRes, routinesRes] = await Promise.all([
                 fetch(`/api/habits?userId=${userId}`),
                 fetch(`/api/tasks?date=${dateStr}&userId=${userId}`),
-                fetch(`/api/routines?userId=${userId}`)
+                fetch(`/api/routines?userId=${userId}&date=${dateStr}`)
             ]);
 
             if (!habitsRes.ok || !tasksRes.ok || !routinesRes.ok) {
@@ -50,8 +52,6 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
             const tasks = await tasksRes.json()
             const routines = await routinesRes.json()
 
-            console.log("DailyPlanner: Received raw data", { habits, tasks, routines });
-
             const combined: Item[] = [
                 ...(Array.isArray(habits) ? habits.map((h: any) => ({
                     id: h.id,
@@ -65,7 +65,7 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                     id: r.id,
                     type: 'routine' as const,
                     title: r.title,
-                    completed: r.completed,
+                    completed: r.logs?.some((l: any) => l.date === dateStr) || false,
                     time: r.time,
                     description: r.description
                 })) : []),
@@ -78,7 +78,6 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                 })) : [])
             ]
 
-            console.log("DailyPlanner: Combined Items:", combined)
             setItems(combined)
         } catch (e) {
             console.error("DailyPlanner: Failed to fetch data", e)
@@ -88,7 +87,14 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
     }
 
     useEffect(() => {
-        fetchData()
+        const currentParams = dateStr + userId
+        if (currentParams !== lastFetch.current) {
+            fetchData()
+            lastFetch.current = currentParams
+        } else if (items.length === 0 && !loading) {
+            // Initial mount fetch
+            fetchData()
+        }
     }, [selectedDate, userId])
 
     const deleteItem = async (id: string, type: 'habit' | 'routine' | 'task') => {

@@ -19,106 +19,104 @@ export async function GET(request: Request) {
         const today = new Date()
         const todayStr = format(today, 'yyyy-MM-dd')
 
-        // 1. Get User Basic Stats
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                _count: {
-                    select: { habits: true }
-                }
-            }
-        })
-
-        if (!user) throw new Error('User not found')
-
-        // 2. Fetch last 30 days of data for evolution analysis
-        const thirtyDaysAgo = subDays(today, 30)
+        // 2. Fetch last 14 days of data for evolution analysis
+        const fourteenDaysAgo = subDays(today, 14)
         const dateRangeFilter = {
-            gte: format(thirtyDaysAgo, 'yyyy-MM-dd'),
+            gte: format(fourteenDaysAgo, 'yyyy-MM-dd'),
             lte: todayStr
         }
 
-        const [tasks, routines, habitLogs] = await Promise.all([
-            (prisma as any).task.findMany({
+        const [user, routines, tasks, habitLogs, routineLogs] = await Promise.all([
+            prisma.user.findUnique({
+                where: { id: userId },
+                include: {
+                    _count: {
+                        select: { habits: true }
+                    }
+                }
+            }),
+            (prisma as any).routine.findMany({
+                where: { userId }
+            }),
+            prisma.task.findMany({
                 where: {
                     userId,
                     date: dateRangeFilter
                 }
             }),
-            (prisma as any).routine.findMany({
-                where: { userId } // Routines are daily, so we need to calculate completion per day manually or assume active
-            }),
             prisma.habitLog.findMany({
                 where: {
                     habit: { userId },
                     date: dateRangeFilter
-                },
-                include: { habit: true }
+                }
+            }),
+            (prisma as any).routineLog.findMany({
+                where: {
+                    routine: { userId },
+                    date: dateRangeFilter
+                }
             })
         ])
 
-        // 3. Process Daily Stats for the last 30 days
-        let dailyStats: any[] = []
+        if (!user) throw new Error('User not found')
+
+        // 3. Process Daily Stats for the last 14 days (optimized)
+        // Group tasks and habit logs by date for O(1) lookups in the loop
+        const tasksByDate: Record<string, { total: number, completed: number }> = {}
+        const habitsByDate: Record<string, number> = {}
+
+        tasks.forEach((t: any) => {
+            if (!tasksByDate[t.date]) tasksByDate[t.date] = { total: 0, completed: 0 }
+            tasksByDate[t.date].total++
+            if (t.completed) tasksByDate[t.date].completed++
+        })
+
+        habitLogs.forEach((h: any) => {
+            habitsByDate[h.date] = (habitsByDate[h.date] || 0) + 1
+        })
+
+        const routinesByDate: Record<string, number> = {}
+        routineLogs.forEach((r: any) => {
+            routinesByDate[r.date] = (routinesByDate[r.date] || 0) + 1
+        })
+
         const userHabitCount = user._count.habits || 0
+        const routineCount = routines.length
 
-        // Helper to check if a date string matches
-        const getItemsForDate = (dateStr: string) => {
-            const dateTasks = tasks.filter((t: any) => t.date === dateStr)
-            const dateHabits = habitLogs.filter((h: any) => h.date === dateStr)
+        // Note: Routine completion is complex in this schema without logs.
+        // We'll treat current routine 'completed' status as today's status.
+        const routinesCompletedToday = routines.filter((r: any) => r.completed).length
 
-            // For routines, we simplify and assume if they exist they are available every day
-            // In a real app we might check creation date
-            const dateRoutines = routines
-
-            const total = dateTasks.length + dateRoutines.length + userHabitCount
-            const completed = dateTasks.filter((t: any) => t.completed).length +
-                dateHabits.length + // Habit logs imply completion
-                dateRoutines.filter((r: any) => r.completed).length // NOTE: Routine completion in DB is likely just "current state". 
-            // For distinct daily history, we'd need a RoutineLog table.
-            // For now, we will use 'completed' flag as 'today's status' 
-            // but for history this is imperfect. 
-            // IGNORE routine completion for history to avoid confusion, 
-            // or assume 0 for past days if not tracked.
-            // BETTER APPROACH: Only count tasks and habits for history accuracy.
-
-            return { total, completed }
-        }
-
-        for (let i = 29; i >= 0; i--) {
+        let dailyStats: any[] = []
+        for (let i = 13; i >= 0; i--) {
             const d = subDays(today, i)
             const dStr = format(d, 'yyyy-MM-dd')
             const dayLabel = format(d, 'MMM dd')
 
-            const { total, completed } = getItemsForDate(dStr)
+            const taskStats = tasksByDate[dStr] || { total: 0, completed: 0 }
+            const habitStats = habitsByDate[dStr] || 0
+            const routineLogStats = routinesByDate[dStr] || 0
+
+            // For historical dates, we count completion based on logs
+            let total = 0
+            let completed = 0
+
+            if (i === 0) {
+                // Today: include baseline totals and today's completions
+                total = taskStats.total + routineCount + userHabitCount
+                completed = taskStats.completed + routinesCompletedToday + habitStats
+            } else {
+                // Past days: include baseline totals and historical logs
+                total = taskStats.total + routineCount + userHabitCount
+                completed = taskStats.completed + routineLogStats + habitStats
+            }
+
             const percentage = total > 0 ? Math.round((completed / total) * 100) : 0
 
             dailyStats.push({
                 date: dStr,
                 label: dayLabel,
                 percentage
-            })
-        }
-
-        // *** DUMMY DATA INJECTION FOR DEMO ***
-        // If the user has no real data (fresh account), inject a "Weekend Slump" pattern
-        let hasRealData = false
-        if (dailyStats.some(d => d.percentage > 0)) hasRealData = true
-
-        if (!hasRealData) {
-            dailyStats = dailyStats.map(stat => {
-                const date = new Date(stat.date)
-                const day = date.getDay()
-                // Simulate: High M-F (80-100%), Low Sat-Sun (20-40%)
-                // Also make Wednesdays a bit lower (60%) to trigger "Struggle Day"
-                let base = 0
-                if (day === 0 || day === 6) base = 30 // Weekend
-                else if (day === 3) base = 60 // Wednesday
-                else base = 90 // Weekday
-
-                // Add randomness
-                const variance = Math.floor(Math.random() * 20) - 10
-                const final = Math.min(100, Math.max(0, base + variance))
-                return { ...stat, percentage: final }
             })
         }
 
@@ -131,8 +129,8 @@ export async function GET(request: Request) {
         const last7Days = dailyStats.slice(-7)
         const avg7Days = Math.round(last7Days.reduce((acc, curr) => acc + curr.percentage, 0) / 7)
 
-        // Monthly (Last 30 days)
-        const avg30Days = Math.round(dailyStats.reduce((acc, curr) => acc + curr.percentage, 0) / 30)
+        // 14-day average (optimized from 30 days)
+        const avg14Days = Math.round(dailyStats.reduce((acc, curr) => acc + curr.percentage, 0) / 14)
 
         // 5. Generate "AI" Insight
         // 5. Advanced Heuristic Analysis
@@ -188,8 +186,8 @@ export async function GET(request: Request) {
             tips.push(`🚀 Power Day: You absolutely crush it on ${bestDay.name}s (${bestDay.score}%). Schedule your hardest work then!`)
         }
 
-        if (avg7Days > avg30Days + 10) {
-            tips.push("📈 Trending Up: Your recent week is much better than your monthly average. Whatever change you made is working!")
+        if (avg7Days > avg14Days + 10) {
+            tips.push("📈 Trending Up: Your recent week is much better than your 14-day average. Whatever change you made is working!")
         }
 
         // Fallback tip
@@ -223,7 +221,7 @@ export async function GET(request: Request) {
             todayProgress,
             thisWeekProgress: avg7Days,
             lastWeekProgress: prevWeekAvg,
-            monthlyProgress: avg30Days,
+            monthlyProgress: avg14Days,
             totalXp: user.totalXp,
             currentXp: user.xp,
             level: user.level,

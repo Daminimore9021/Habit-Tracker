@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import MouseSpotlight from './MouseSpotlight'
 
 const scrollFadeVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 15 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" as any }
+    transition: { duration: 0.3, ease: "easeOut" as any }
   }
 }
 
@@ -26,7 +26,6 @@ import HabitGrid from './dashboard/HabitGrid'
 import RoutineGrid from './dashboard/RoutineGrid'
 import TaskGrid from './dashboard/TaskGrid'
 import SettingsView from './dashboard/SettingsView'
-import AIChatbot from '@/components/dashboard/AIChatbot'
 import FocusTimer from './dashboard/FocusTimer'
 import AnalyticsDashboard from './Analytics/AnalyticsDashboard'
 
@@ -35,12 +34,29 @@ export default function AnimatedDashboard() {
   const [mounted, setMounted] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [userId, setUserId] = useState<string | null>(null)
+  const [userData, setUserData] = useState<any>(null)
+
+  const fetchUser = async (id: string) => {
+    try {
+      const res = await fetch(`/api/user?userId=${id}`)
+      if (res.ok) {
+        const data = await res.json()
+        setUserData(data)
+      } else if (res.status === 404) {
+        localStorage.clear()
+        window.location.href = '/login'
+      }
+    } catch (e) {
+      console.error("Dashboard: User fetch failed", e)
+    }
+  }
 
   useEffect(() => {
     setMounted(true)
     const id = localStorage.getItem('userId')
     if (id && id !== 'null' && id !== 'undefined') {
       setUserId(id)
+      fetchUser(id)
     }
   }, [])
 
@@ -65,10 +81,10 @@ export default function AnimatedDashboard() {
 
       <main className="lg:pl-72 min-h-screen transition-all duration-300">
         <div className="max-w-[1600px] mx-auto p-4 sm:p-8 lg:p-10 space-y-8 sm:space-y-10">
-          <Header userId={userId || undefined} />
+          <Header userId={userId || undefined} userData={userData} />
 
           <AnimatePresence mode="wait">
-            {activeTab === 'dashboard' && (
+            {activeTab === 'dashboard' ? (
               <motion.div
                 key="dashboard"
                 initial={{ opacity: 0, y: 10 }}
@@ -81,7 +97,7 @@ export default function AnimatedDashboard() {
                   variants={scrollFadeVariants}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                   className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10 items-stretch"
                 >
                   <div className="lg:col-span-2 h-full">
@@ -97,7 +113,7 @@ export default function AnimatedDashboard() {
                   variants={scrollFadeVariants}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                   className="grid grid-cols-1 lg:grid-cols-4 gap-6"
                 >
                   <div className="lg:col-span-1 space-y-6">
@@ -113,14 +129,12 @@ export default function AnimatedDashboard() {
                   variants={scrollFadeVariants}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                 >
                   <DailyPlanner selectedDate={selectedDate} userId={userId || undefined} />
                 </motion.div>
               </motion.div>
-            )}
-
-            {activeTab === 'habits' && (
+            ) : activeTab === 'habits' ? (
               <motion.div
                 key="habits"
                 initial={{ opacity: 0, y: 10 }}
@@ -132,14 +146,12 @@ export default function AnimatedDashboard() {
                   variants={scrollFadeVariants}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                 >
                   <HabitGrid userId={userId || undefined} />
                 </motion.div>
               </motion.div>
-            )}
-
-            {activeTab === 'routine' && (
+            ) : activeTab === 'routine' ? (
               <motion.div
                 key="routine"
                 initial={{ opacity: 0, y: 10 }}
@@ -151,14 +163,12 @@ export default function AnimatedDashboard() {
                   variants={scrollFadeVariants}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                 >
                   <RoutineGrid userId={userId || undefined} />
                 </motion.div>
               </motion.div>
-            )}
-
-            {activeTab === 'tasks' && (
+            ) : activeTab === 'tasks' ? (
               <motion.div
                 key="tasks"
                 initial={{ opacity: 0, y: 10 }}
@@ -170,14 +180,12 @@ export default function AnimatedDashboard() {
                   variants={scrollFadeVariants}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                 >
                   <TaskGrid userId={userId || undefined} />
                 </motion.div>
               </motion.div>
-            )}
-
-            {activeTab === 'settings' && (
+            ) : activeTab === 'settings' ? (
               <motion.div
                 key="settings"
                 initial={{ opacity: 0, y: 10 }}
@@ -187,9 +195,7 @@ export default function AnimatedDashboard() {
               >
                 <SettingsView userId={userId || undefined} />
               </motion.div>
-            )}
-
-            {activeTab === 'analytics' && (
+            ) : activeTab === 'analytics' ? (
               <motion.div
                 key="analytics"
                 initial={{ opacity: 0, y: 10 }}
@@ -199,7 +205,7 @@ export default function AnimatedDashboard() {
               >
                 <AnalyticsDashboard />
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
 
           {/* Footer / Copyright */}
@@ -207,9 +213,6 @@ export default function AnimatedDashboard() {
             <p>© 2024 FocusFlow. Designed for excellence.</p>
           </div>
         </div>
-
-        {/* Global Floating AI Chatbot */}
-        <AIChatbot userId={userId || undefined} />
       </main>
     </div>
   )

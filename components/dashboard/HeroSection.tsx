@@ -51,10 +51,10 @@ export default function HeroSection() {
     }
 
     return (
-        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-white/5 shadow-2xl h-[350px] flex items-center">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-white/5 shadow-2xl min-h-[300px] h-auto md:h-[350px] flex items-center">
             {/* Dynamic Background */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/20 blur-[100px] rounded-full mix-blend-screen" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/20 blur-[80px] rounded-full mix-blend-screen" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 blur-[60px] rounded-full mix-blend-screen" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 blur-[40px] rounded-full mix-blend-screen" />
 
             <div className="relative z-10 p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-10">
                 <div className="space-y-6 max-w-xl text-center md:text-left flex flex-col items-center md:items-start">

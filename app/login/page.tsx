@@ -113,7 +113,7 @@ export default function Login() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 relative py-12">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 overflow-hidden z-0">
         <motion.div
@@ -259,8 +259,7 @@ export default function Login() {
 
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
                   <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Email Address</label>
-                  <motion.div variants={itemVariants} className="relative group">
-                    {/* Reuse User icon for email or find another if needed */}
+                  <div className="relative group">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
                     <input
                       type="email"
@@ -270,7 +269,7 @@ export default function Login() {
                       placeholder="Enter your email"
                       required={!isLogin}
                     />
-                  </motion.div>
+                  </div>
                 </motion.div>
               </>
             )}

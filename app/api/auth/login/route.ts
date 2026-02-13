@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         }
 
         // Find user
-        const user = await (prisma as any).user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { username }
         })
 
