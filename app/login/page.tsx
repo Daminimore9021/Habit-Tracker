@@ -37,8 +37,7 @@ export default function Login() {
   const router = useRouter()
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId')
-    if (userId) {
+    if (localStorage.getItem('userId')) {
       router.push('/')
     }
   }, [router])
@@ -137,25 +136,37 @@ export default function Login() {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card w-full max-w-md p-8 rounded-2xl relative z-10 border border-white/10"
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="glass-card w-full max-w-md p-8 rounded-[2.5rem] relative z-10 border border-white/10 shadow-2xl overflow-hidden"
       >
         <div className="text-center mb-8">
           <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="inline-block p-3 rounded-full bg-blue-500/10 mb-4"
+            initial={{ scale: 0.5, opacity: 0, rotate: -20 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="inline-block p-4 rounded-2xl bg-blue-500/10 mb-5 border border-blue-500/20"
           >
-            <Lock className="w-8 h-8 text-blue-500" />
+            <Lock className="w-10 h-10 text-blue-500" />
           </motion.div>
-          <motion.h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-            {isForgotPassword ? 'Reset Password' : (isLogin ? 'Welcome Back' : 'Create Account')}
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 tracking-tight"
+          >
+            {isForgotPassword ? 'Reset Password' : (isLogin ? 'FocusFlow' : 'Join Us')}
           </motion.h1>
-          <motion.p className="text-gray-400 mt-2 text-sm">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-gray-400 mt-3 text-sm font-medium"
+          >
             {isForgotPassword
               ? 'Enter your email to receive a password reset link'
-              : (isLogin ? 'Enter your credentials to access your workspace' : 'Join FocusFlow and start your journey today')}
+              : (isLogin ? 'Your journey to excellence starts here' : 'Start your journey to absolute focus today')}
           </motion.p>
         </div>
 
@@ -242,7 +253,7 @@ export default function Login() {
           >
             {!isLogin && (
               <>
-                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
+                <motion.div variants={itemVariants} className="space-y-1">
                   <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Full Name</label>
                   <div className="relative group">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
@@ -257,7 +268,7 @@ export default function Login() {
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-1">
+                <motion.div variants={itemVariants} className="space-y-1">
                   <label className="text-[10px] uppercase tracking-wider font-bold text-gray-500 ml-1">Email Address</label>
                   <div className="relative group">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
@@ -336,12 +347,12 @@ export default function Login() {
         )}
 
         {!isForgotPassword && (
-          <div className="mt-6 space-y-4 text-center">
+          <motion.div variants={itemVariants} className="mt-8 space-y-4 text-center border-t border-white/5 pt-6">
             {isLogin && (
               <div>
                 <button
                   onClick={() => setIsForgotPassword(true)}
-                  className="text-xs text-blue-500 hover:text-blue-400 font-medium transition-colors"
+                  className="text-xs text-blue-500 hover:text-blue-400 font-bold transition-colors uppercase tracking-widest"
                 >
                   Forgot Password?
                 </button>
@@ -354,12 +365,12 @@ export default function Login() {
                 setSuccess('')
                 setError('')
               }}
-              className="text-sm text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-gray-400 hover:text-white transition-colors font-medium"
             >
               {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <span className="text-blue-500 font-bold ml-1">{isLogin ? 'Sign Up' : 'Sign In'}</span>
+              <span className="text-blue-500 font-black ml-1 uppercase tracking-wider hover:underline">{isLogin ? 'Sign Up' : 'Sign In'}</span>
             </button>
-          </div>
+          </motion.div>
         )}
       </motion.div>
     </div>

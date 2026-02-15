@@ -8,8 +8,8 @@ export default function Home() {
 
   useEffect(() => {
     // Keep auth check simple for now, can be replaced with Supabase Auth later
-    const auth = localStorage.getItem('isAuthenticated')
-    if (auth !== 'true') {
+    const userId = localStorage.getItem('userId')
+    if (!userId) {
       window.location.href = '/login'
     } else {
       setIsAuthenticated(true)
