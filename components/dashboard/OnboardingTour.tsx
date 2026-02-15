@@ -6,7 +6,7 @@ import { Sparkles, Target, Zap, Bot, ArrowRight, X } from 'lucide-react'
 
 const STEPS = [
     {
-        title: "Welcome to FocusFlow",
+        title: "Welcome to HabitQuest",
         description: "Your ultimate personal dashboard for productivity and growth. Let's take a quick tour!",
         icon: <Sparkles className="w-8 h-8 text-indigo-400" />,
         color: "from-indigo-500 to-purple-500"
@@ -19,7 +19,7 @@ const STEPS = [
     },
     {
         title: "Meet Your AI Coach",
-        description: "FocusFlow AI is here to help. Ask it for performance insights or to help you schedule tasks!",
+        description: "HabitQuest AI is here to help. Ask it for performance insights or to help you schedule tasks!",
         icon: <Bot className="w-8 h-8 text-emerald-400" />,
         color: "from-emerald-500 to-teal-500"
     },

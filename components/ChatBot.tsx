@@ -16,9 +16,11 @@ export default function ChatBot() {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
 
-    // Hide on auth pages
-    const isAuthPage = pathname?.startsWith('/login') ||
+    // Hide on auth pages AND root path (to prevent showing during redirects)
+    const isAuthPage = pathname === '/' ||
+        pathname?.startsWith('/login') ||
         pathname?.startsWith('/signup') ||
+        pathname?.startsWith('/forgot-password') ||
         pathname?.startsWith('/reset-password')
 
     if (isAuthPage) return null
@@ -26,7 +28,7 @@ export default function ChatBot() {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
-            text: 'Welcome to FocusFlow! ✨ I\'m your AI assistant. How can I help you optimize your habits and routines today?',
+            text: 'Welcome to HabitQuest! ✨ I\'m your AI assistant. How can I help you level up your habits today?',
             sender: 'bot',
             timestamp: new Date()
         }
@@ -46,7 +48,7 @@ export default function ChatBot() {
 
         const userId = localStorage.getItem('userId')
         if (!userId) {
-            alert('Please login to use FocusFlow AI')
+            alert('Please login to use HabitQuest AI')
             return
         }
 
@@ -122,7 +124,7 @@ export default function ChatBot() {
                                     <Bot className="w-6 h-6 text-indigo-400" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-semibold text-white">FocusFlow AI</h3>
+                                    <h3 className="text-sm font-semibold text-white">HabitQuest AI</h3>
                                     <div className="flex items-center gap-1.5 leading-none">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-500/80">Online</span>

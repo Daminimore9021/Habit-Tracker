@@ -4,8 +4,8 @@ import ChatBot from '@/components/ChatBot'
 import { AuthProvider } from '@/contexts/AuthContext'
 
 export const metadata: Metadata = {
-  title: 'FocusFlow | Premium Habit Tracker',
-  description: 'Track your daily habits, routines, and tasks with style.',
+  title: 'HabitQuest | Level Up Your Life',
+  description: 'Gamify your habits, track your progress, and level up your life.',
 }
 
 export default function RootLayout({

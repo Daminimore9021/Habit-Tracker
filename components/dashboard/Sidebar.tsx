@@ -74,7 +74,7 @@ export default function Sidebar({ activeTab, setActiveTab, logout, userId }: Sid
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-900/40">
                     <LayoutDashboard className="text-white" size={18} />
                 </div>
-                <span className="font-bold text-xl tracking-tight text-white">FocusFlow</span>
+                <span className="font-bold text-xl tracking-tight text-white">HabitQuest</span>
             </div>
 
             {/* User Profile / XP Bar */}

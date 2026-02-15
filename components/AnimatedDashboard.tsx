@@ -227,7 +227,7 @@ export default function AnimatedDashboard() {
 
           {/* Footer / Copyright */}
           <div className="pt-12 pb-4 text-center text-gray-600 text-[10px] uppercase tracking-[0.2em] font-medium opacity-50">
-            <p>© 2026 FocusFlow • Crafted for your best self.</p>
+            <p>© 2026 HabitQuest • Crafted for your best self.</p>
           </div>
         </div>
       </main>

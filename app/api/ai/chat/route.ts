@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         const habitLogsCount = habitLogs.length
 
         // 2. Prepare System Prompt
-        const systemPrompt = `You are FocusFlow AI, a productivity coach for a habit tracker app. 
+        const systemPrompt = `You are HabitQuest AI, a productivity coach for a habit tracker app. 
 Your tone is encouraging, professional, and data-driven.
 The user's name is ${user.name || 'User'}.
 Current Stats:
@@ -94,7 +94,7 @@ Rules:
         const chat = model.startChat({
             history: [
                 { role: 'user', parts: [{ text: "Hello, who are you?" }] },
-                { role: 'model', parts: [{ text: "I am your FocusFlow AI coach. I'm here to help you stay productive and reach your goals!" }] },
+                { role: 'model', parts: [{ text: "I am your HabitQuest AI coach. I'm here to help you stay productive and reach your goals!" }] },
                 { role: 'user', parts: [{ text: `System Context: ${systemPrompt}` }] },
                 { role: 'model', parts: [{ text: "Understood. I have access to the user's data and can perform actions to help them stay organized." }] },
                 ...(history || []).map((msg: any) => ({

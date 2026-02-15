@@ -45,13 +45,13 @@ export async function POST(request: Request) {
         const resetLink = `${origin}/reset-password?token=${resetToken}`
 
         await resend.emails.send({
-            from: 'FocusFlow <onboarding@resend.dev>', // Update this after domain verification
+            from: 'HabitQuest <onboarding@resend.dev>', // Update this after domain verification
             to: email,
-            subject: 'Password Reset - FocusFlow',
+            subject: 'Password Reset - HabitQuest',
             html: `
                 <div style="font-family: sans-serif; padding: 20px; color: #333;">
                     <h2>Reset Your Password</h2>
-                    <p>You requested a password reset for your FocusFlow account. Click the button below to set a new password:</p>
+                    <p>You requested a password reset for your HabitQuest account. Click the button below to set a new password:</p>
                     <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
                     <p>This link will expire in 1 hour.</p>
                     <p>If you didn't request this, you can safely ignore this email.</p>

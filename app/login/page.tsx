@@ -138,7 +138,7 @@ export default function Login() {
             transition={{ delay: 0.3 }}
             className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 tracking-tight"
           >
-            {isForgotPassword ? 'Reset Password' : (isLogin ? 'FocusFlow' : 'Join Us')}
+            {isForgotPassword ? 'Reset Password' : (isLogin ? 'HabitQuest' : 'Join Us')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
