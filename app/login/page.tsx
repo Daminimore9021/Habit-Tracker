@@ -121,7 +121,7 @@ export default function Login() {
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="glass-card w-full max-w-md p-8 rounded-[2.5rem] relative z-10 border border-white/10 shadow-2xl overflow-hidden"
+        className="glass-card w-full max-w-sm p-6 rounded-[2rem] relative z-10 border border-white/10 shadow-2xl overflow-hidden"
       >
         <div className="text-center mb-8">
           <motion.div
@@ -130,13 +130,13 @@ export default function Login() {
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             className="inline-block p-4 rounded-2xl bg-blue-500/10 mb-5 border border-blue-500/20"
           >
-            <Lock className="w-10 h-10 text-blue-500" />
+            <Lock className="w-8 h-8 text-blue-500" />
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 tracking-tight"
+            className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 tracking-tight"
           >
             {isForgotPassword ? 'Reset Password' : (isLogin ? 'HabitQuest' : 'Join Us')}
           </motion.h1>
