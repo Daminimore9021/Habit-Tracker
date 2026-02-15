@@ -30,7 +30,7 @@ export default function MouseSpotlight() {
                 height: '100vh',
                 pointerEvents: 'none', // Crucial: don't block clicks or scroll
                 zIndex: 9999,
-                background: `radial-gradient(600px circle at var(--x) var(--y), rgba(99, 102, 241, 0.05), transparent 80%)`,
+                background: `radial-gradient(600px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), rgba(99, 102, 241, 0.05), transparent 80%)`,
             }}
             className="hidden lg:block"
             animate={{

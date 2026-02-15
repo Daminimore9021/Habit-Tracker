@@ -9,18 +9,26 @@ function AnimatedNumber({ value }: { value: number }) {
     const [displayValue, setDisplayValue] = useState(0)
 
     useEffect(() => {
+        if (typeof value !== 'number' || isNaN(value)) {
+            setDisplayValue(0)
+            return
+        }
+
         let start = 0
         const end = value
-        if (start === end) return
+        if (start === end) {
+            setDisplayValue(end)
+            return
+        }
 
         let totalDuration = 1000
         let iterationTime = 20
         let totalIterations = totalDuration / iterationTime
         let increment = end / totalIterations
 
-        let timer = setInterval(() => {
+        const timer = setInterval(() => {
             start += increment
-            if (start >= end) {
+            if (increment > 0 ? start >= end : start <= end) {
                 setDisplayValue(end)
                 clearInterval(timer)
             } else {
@@ -31,7 +39,7 @@ function AnimatedNumber({ value }: { value: number }) {
         return () => clearInterval(timer)
     }, [value])
 
-    return <span>{displayValue.toLocaleString()}</span>
+    return <span>{typeof displayValue === 'number' ? displayValue.toLocaleString() : '0'}</span>
 }
 
 interface ProgressRingProps {

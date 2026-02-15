@@ -1,0 +1,42 @@
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+    const { pathname } = request.nextUrl
+
+    // Public routes that don't require authentication
+    const publicRoutes = ['/login', '/signup', '/reset-password', '/forgot-password']
+    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+
+    // Allow public routes
+    if (isPublicRoute) {
+        return NextResponse.next()
+    }
+
+    // For protected routes, check if user has a session
+    // We'll check for the Supabase auth token in cookies
+    const token = request.cookies.get('sb-access-token')?.value ||
+        request.cookies.get('sb-amsjnzfebhbbywouvegb-auth-token')?.value
+
+    // If no token, redirect to login
+    if (!token && pathname !== '/login') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
+    }
+
+    return NextResponse.next()
+}
+
+export const config = {
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - public folder
+         */
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import ChatBot from '@/components/ChatBot'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export const metadata: Metadata = {
   title: 'FocusFlow | Premium Habit Tracker',
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="bg-[#020617]">
-        {children}
-        <ChatBot />
+        <AuthProvider>
+          {children}
+          <ChatBot />
+        </AuthProvider>
       </body>
     </html>
   )

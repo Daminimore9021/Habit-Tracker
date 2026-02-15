@@ -1,21 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import prisma from '@/lib/prisma'
+import { getAuthenticatedUser } from '@/lib/auth-helpers'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     headers()
     try {
-        const { searchParams } = new URL(request.url)
-        const userId = searchParams.get('userId')
+        // Get authenticated user from Supabase session
+        const authResult = await getAuthenticatedUser(request)
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+        if (authResult.error) {
+            return authResult.response
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: userId }
+            where: { id: authResult.userId }
         })
 
         if (!user) {
@@ -29,18 +30,22 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
-    try {
-        const body = await request.json()
-        const { xpToAdd, userId } = body
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+export async function POST(request: NextRequest) {
+    try {
+        // Get authenticated user from Supabase session
+        const authResult = await getAuthenticatedUser(request)
+
+        if (authResult.error) {
+            return authResult.response
         }
+
+        const body = await request.json()
+        const { xpToAdd } = body
 
         // Get current user
         const user = await prisma.user.findUnique({
-            where: { id: userId }
+            where: { id: authResult.userId }
         })
 
         if (!user) throw new Error('User not found')
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
         const newLevel = Math.floor(newXp / 100) + 1
 
         const updatedUser = await prisma.user.update({
-            where: { id: userId },
+            where: { id: authResult.userId },
             data: {
                 xp: newXp,
                 totalXp: newTotalXp,
@@ -59,23 +64,26 @@ export async function POST(request: Request) {
         })
 
         return NextResponse.json(updatedUser)
-        return NextResponse.json(updatedUser)
     } catch (error: any) {
         return NextResponse.json({ error: error.message || 'Failed to update XP' }, { status: 500 })
     }
 }
 
-export async function PATCH(request: Request) {
-    try {
-        const body = await request.json()
-        const { name, avatar, userId } = body
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+export async function PATCH(request: NextRequest) {
+    try {
+        // Get authenticated user from Supabase session
+        const authResult = await getAuthenticatedUser(request)
+
+        if (authResult.error) {
+            return authResult.response
         }
 
+        const body = await request.json()
+        const { name, avatar } = body
+
         const updatedUser = await prisma.user.update({
-            where: { id: userId },
+            where: { id: authResult.userId },
             data: {
                 ...(name && { name }),
                 ...(avatar !== undefined && { avatar })

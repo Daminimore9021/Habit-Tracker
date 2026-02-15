@@ -1,22 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import prisma from '@/lib/prisma'
+import { getAuthenticatedUser } from '@/lib/auth-helpers'
 
-export async function GET(request: Request) {
+
+export async function GET(request: NextRequest) {
     headers()
     console.log('--- Habits API hit [Vercel-Fix-Check] ---')
     try {
-        const { searchParams } = new URL(request.url)
-        const userId = searchParams.get('userId')
+        // Get authenticated user from Supabase session
+        const authResult = await getAuthenticatedUser(request)
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+        if (authResult.error) {
+            return authResult.response
         }
 
         const habits = await prisma.habit.findMany({
-            where: { userId },
+            where: { userId: authResult.userId },
             include: { logs: true },
             orderBy: { createdAt: 'asc' }
         })
@@ -27,14 +29,18 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
-    try {
-        const body = await request.json()
-        const { title, emoji, color, description, userId } = body
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+export async function POST(request: NextRequest) {
+    try {
+        // Get authenticated user from Supabase session
+        const authResult = await getAuthenticatedUser(request)
+
+        if (authResult.error) {
+            return authResult.response
         }
+
+        const body = await request.json()
+        const { title, emoji, color, description } = body
 
         const habit = await prisma.habit.create({
             data: {
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
                 emoji,
                 color,
                 description,
-                userId,
+                userId: authResult.userId!,
             }
         })
 
@@ -51,8 +57,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error.message || 'Failed to create habit' }, { status: 500 })
     }
 }
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
     try {
+        // Get authenticated user from Supabase session
+        const authResult = await getAuthenticatedUser(request)
+
+        if (authResult.error) {
+            return authResult.response
+        }
+
         const body = await request.json()
         const { id } = body
 
@@ -60,8 +73,12 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Habit ID is required' }, { status: 400 })
         }
 
+        // Verify ownership before deleting
         const habit = await prisma.habit.delete({
-            where: { id }
+            where: {
+                id,
+                userId: authResult.userId // Ensure user owns this habit
+            }
         })
 
         return NextResponse.json({ success: true, habit })

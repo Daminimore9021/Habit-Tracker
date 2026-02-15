@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import MouseSpotlight from '@/components/MouseSpotlight'
+import { useAuth } from '@/contexts/AuthContext'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -35,12 +36,13 @@ export default function Login() {
   const [isForgotPassword, setIsForgotPassword] = useState(false)
   const [forgotEmail, setForgotEmail] = useState('')
   const router = useRouter()
+  const { user, signIn, signUp, resetPassword } = useAuth()
 
   useEffect(() => {
-    if (localStorage.getItem('userId')) {
+    if (user) {
       router.push('/')
     }
-  }, [router])
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,34 +51,20 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup'
-      const payload = isLogin ? { username, password } : { username, password, name, email }
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Something went wrong')
-      }
-
-      // Success
       if (isLogin) {
-        localStorage.setItem('isAuthenticated', 'true')
-        localStorage.setItem('userId', data.id)
-        localStorage.setItem('user', JSON.stringify(data))
-        router.push('/')
+        // Sign in with email/password
+        const { error } = await signIn(email, password)
+        if (error) throw error
       } else {
-        setSuccess('Account created successfully! Please sign in.')
+        // Sign up with email/password/username
+        const { error } = await signUp(email, password, username)
+        if (error) throw error
+        setSuccess('Account created successfully! Please check your email to verify.')
         setIsLogin(true)
         setPassword('')
       }
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'Authentication failed')
     } finally {
       setIsLoading(false)
     }
@@ -89,22 +77,16 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail })
-      })
+      const { error } = await resetPassword(forgotEmail)
+      if (error) throw error
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to send reset link')
-      }
-
-      setSuccess('Password reset link sent to your email!')
-      setIsForgotPassword(false)
+      setSuccess('Password reset link sent! Check your email.')
+      setTimeout(() => {
+        setIsForgotPassword(false)
+        setForgotEmail('')
+      }, 2000)
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'Failed to send reset email')
     } finally {
       setIsLoading(false)
     }

@@ -1,20 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import prisma from '@/lib/prisma'
 import { startOfDay, endOfDay, subDays, format } from 'date-fns'
+import { getAuthenticatedUser } from '@/lib/auth-helpers'
 
-export async function GET(request: Request) {
-    headers() // Explicitly force dynamic rendering
+export async function GET(request: NextRequest) {
+    headers()
     console.log('--- Stats API hit [Vercel-Fix-Check] ---')
     try {
-        const { searchParams } = new URL(request.url)
-        const userId = searchParams.get('userId')
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-        }
+        const userId = authResult.userId!
 
         const today = new Date()
         const todayStr = format(today, 'yyyy-MM-dd')

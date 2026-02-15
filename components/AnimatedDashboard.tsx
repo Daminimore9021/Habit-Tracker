@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import MouseSpotlight from './MouseSpotlight'
+import { useAuth } from '@/contexts/AuthContext'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -57,8 +58,8 @@ export default function AnimatedDashboard() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'routine' | 'tasks' | 'habits' | 'settings' | 'analytics'>('dashboard')
   const [mounted, setMounted] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [userId, setUserId] = useState<string | null>(null)
   const [userData, setUserData] = useState<any>(null)
+  const { user, signOut } = useAuth()
 
   const fetchUser = async (id: string) => {
     try {
@@ -67,8 +68,7 @@ export default function AnimatedDashboard() {
         const data = await res.json()
         setUserData(data)
       } else if (res.status === 404) {
-        localStorage.clear()
-        window.location.href = '/login'
+        await signOut()
       }
     } catch (e) {
       console.error("Dashboard: User fetch failed", e)
@@ -77,21 +77,12 @@ export default function AnimatedDashboard() {
 
   useEffect(() => {
     setMounted(true)
-    const id = localStorage.getItem('userId')
-    if (id && id !== 'null' && id !== 'undefined') {
-      setUserId(id)
-      fetchUser(id)
+    if (user?.id) {
+      fetchUser(user.id)
     }
-  }, [])
+  }, [user])
 
   if (!mounted) return null
-
-  const logout = () => {
-    localStorage.removeItem('isAuthenticated')
-    localStorage.removeItem('userId')
-    localStorage.removeItem('user')
-    window.location.href = '/login'
-  }
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-indigo-500/30 relative">
@@ -99,13 +90,13 @@ export default function AnimatedDashboard() {
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab as any}
-        logout={logout}
-        userId={userId || undefined}
+        logout={signOut}
+        userId={user?.id}
       />
 
       <main className="lg:pl-72 min-h-screen transition-all duration-300 overflow-y-auto overflow-x-hidden">
         <div className="max-w-[1600px] mx-auto p-4 sm:p-8 lg:p-10 space-y-8 sm:space-y-10">
-          <Header userId={userId || undefined} userData={userData} />
+          <Header userId={user?.id} userData={userData} />
 
           <AnimatePresence mode="wait">
             {activeTab === 'dashboard' ? (
@@ -149,7 +140,7 @@ export default function AnimatedDashboard() {
                     whileHover={hoverEffect}
                     className="lg:col-span-3"
                   >
-                    <StatsOverview userId={userId || undefined} />
+                    <StatsOverview userId={user?.id} />
                   </motion.div>
                 </div>
 
@@ -158,7 +149,7 @@ export default function AnimatedDashboard() {
                   variants={cardVariants}
                   whileHover={hoverEffect}
                 >
-                  <DailyPlanner selectedDate={selectedDate} userId={userId || undefined} />
+                  <DailyPlanner selectedDate={selectedDate} userId={user?.id} />
                 </motion.div>
               </motion.div>
             ) : activeTab === 'habits' ? (
@@ -172,7 +163,7 @@ export default function AnimatedDashboard() {
                 <motion.div
                   variants={cardVariants}
                 >
-                  <HabitGrid userId={userId || undefined} />
+                  <HabitGrid userId={user?.id} />
                 </motion.div>
               </motion.div>
             ) : activeTab === 'routine' ? (
@@ -186,7 +177,7 @@ export default function AnimatedDashboard() {
                 <motion.div
                   variants={cardVariants}
                 >
-                  <RoutineGrid userId={userId || undefined} />
+                  <RoutineGrid userId={user?.id} />
                 </motion.div>
               </motion.div>
             ) : activeTab === 'tasks' ? (
@@ -200,7 +191,7 @@ export default function AnimatedDashboard() {
                 <motion.div
                   variants={cardVariants}
                 >
-                  <TaskGrid userId={userId || undefined} />
+                  <TaskGrid userId={user?.id} />
                 </motion.div>
               </motion.div>
             ) : activeTab === 'settings' ? (
@@ -214,7 +205,7 @@ export default function AnimatedDashboard() {
                 <motion.div
                   variants={cardVariants}
                 >
-                  <SettingsView userId={userId || undefined} />
+                  <SettingsView userId={user?.id} />
                 </motion.div>
               </motion.div>
             ) : activeTab === 'analytics' ? (

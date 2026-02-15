@@ -1,22 +1,22 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import prisma from '@/lib/prisma'
+import { getAuthenticatedUser } from '@/lib/auth-helpers'
 
-export async function GET(request: Request) {
+
+export async function GET(request: NextRequest) {
     headers()
     try {
-        const { searchParams } = new URL(request.url)
-        const userId = searchParams.get('userId')
-        const date = searchParams.get('date') // Optional: to filter logs in the future
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-        }
+        const { searchParams } = new URL(request.url)
+        const date = searchParams.get('date')
 
         const routines = await prisma.routine.findMany({
-            where: { userId },
+            where: { userId: authResult.userId! },
             include: {
                 logs: date ? { where: { date } } : true
             },
@@ -29,23 +29,23 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
-    try {
-        const body = await request.json()
-        const { title, time = "Daily", description, userId } = body
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-        }
+export async function POST(request: NextRequest) {
+    try {
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
+
+        const body = await request.json()
+        const { title, time = "Daily", description } = body
 
         const routine = await prisma.routine.create({
             data: {
                 title,
                 time,
                 description,
-                userId,
+                userId: authResult.userId!,
                 completed: false,
-                order: 99 // Put at end
+                order: 99
             }
         })
 
@@ -55,10 +55,14 @@ export async function POST(request: Request) {
     }
 }
 
-export async function PATCH(request: Request) {
+
+export async function PATCH(request: NextRequest) {
     try {
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
+
         const body = await request.json()
-        const { id, completed, userId, date } = body
+        const { id, completed, date } = body
 
         if (!date) {
             return NextResponse.json({ error: 'Date is required for routine tracking' }, { status: 400 })
@@ -89,10 +93,11 @@ export async function PATCH(request: Request) {
         }
 
         // Award XP if completed
-        if (completed && userId) {
-            await fetch('http://localhost:3000/api/user', {
+        if (completed) {
+            await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/user`, {
                 method: 'POST',
-                body: JSON.stringify({ xpToAdd: 5, userId })
+                headers: { 'Content-Type': 'application/json', 'Cookie': request.headers.get('cookie') || '' },
+                body: JSON.stringify({ xpToAdd: 5 })
             })
         }
 
@@ -102,8 +107,12 @@ export async function PATCH(request: Request) {
     }
 }
 
-export async function DELETE(request: Request) {
+
+export async function DELETE(request: NextRequest) {
     try {
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
+
         const body = await request.json()
         const { id } = body
 
@@ -112,7 +121,7 @@ export async function DELETE(request: Request) {
         }
 
         const routine = await (prisma as any).routine.delete({
-            where: { id }
+            where: { id, userId: authResult.userId! }
         })
 
         return NextResponse.json({ success: true, routine })

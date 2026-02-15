@@ -1,23 +1,23 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import prisma from '@/lib/prisma'
+import { getAuthenticatedUser } from '@/lib/auth-helpers'
 
-export async function GET(request: Request) {
+
+export async function GET(request: NextRequest) {
     headers()
     try {
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
+
         const { searchParams } = new URL(request.url)
         const date = searchParams.get('date')
-        const userId = searchParams.get('userId')
-
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-        }
 
         const tasks = await (prisma as any).task.findMany({
             where: {
-                userId,
+                userId: authResult.userId!,
                 ...(date ? { date } : {})
             },
             orderBy: { createdAt: 'asc' }
@@ -29,21 +29,21 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST(request: Request) {
-    try {
-        const body = await request.json()
-        const { title, date, description, userId } = body
 
-        if (!userId) {
-            return NextResponse.json({ error: 'userId is required' }, { status: 400 })
-        }
+export async function POST(request: NextRequest) {
+    try {
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
+
+        const body = await request.json()
+        const { title, date, description } = body
 
         const task = await (prisma as any).task.create({
             data: {
                 title,
-                date, // YYYY-MM-DD
+                date,
                 description,
-                userId,
+                userId: authResult.userId!,
                 completed: false
             }
         })
@@ -54,21 +54,26 @@ export async function POST(request: Request) {
     }
 }
 
-export async function PATCH(request: Request) {
+
+export async function PATCH(request: NextRequest) {
     try {
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
+
         const body = await request.json()
-        const { id, completed, userId } = body
+        const { id, completed } = body
 
         const task = await (prisma as any).task.update({
-            where: { id },
+            where: { id, userId: authResult.userId! },
             data: { completed }
         })
 
-        // Award XP if completed
-        if (completed && userId) {
-            await fetch('http://localhost:3000/api/user', {
+        // Award XP if completed (call internal API)
+        if (completed) {
+            await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/user`, {
                 method: 'POST',
-                body: JSON.stringify({ xpToAdd: 10, userId })
+                headers: { 'Content-Type': 'application/json', 'Cookie': request.headers.get('cookie') || '' },
+                body: JSON.stringify({ xpToAdd: 10 })
             })
         }
 
@@ -77,8 +82,11 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
     try {
+        const authResult = await getAuthenticatedUser(request)
+        if (authResult.error) return authResult.response
+
         const body = await request.json()
         const { id } = body
 
@@ -87,7 +95,7 @@ export async function DELETE(request: Request) {
         }
 
         const task = await (prisma as any).task.delete({
-            where: { id }
+            where: { id, userId: authResult.userId! }
         })
 
         return NextResponse.json({ success: true, task })

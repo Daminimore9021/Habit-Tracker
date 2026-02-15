@@ -1,24 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 import AnimatedDashboard from '@/components/AnimatedDashboard'
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { user, loading } = useAuth()
 
-  useEffect(() => {
-    // Keep auth check simple for now, can be replaced with Supabase Auth later
-    const userId = localStorage.getItem('userId')
-    if (!userId) {
-      window.location.href = '/login'
-    } else {
-      setIsAuthenticated(true)
-    }
-  }, [])
-
-  if (!isAuthenticated) {
-    return null
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+          <p className="text-sm font-medium animate-pulse">Syncing FocusFlow...</p>
+        </div>
+      </div>
+    )
   }
 
-  return <AnimatedDashboard />
+  // If not authenticated, redirect happens in middleware
+  // If authenticated, show the dashboard
+  return user ? <AnimatedDashboard /> : null
 }
