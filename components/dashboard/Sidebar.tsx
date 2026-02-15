@@ -112,28 +112,37 @@ export default function Sidebar({ activeTab, setActiveTab, logout, userId }: Sid
                     Menu
                 </div>
                 {navItems.map((item) => (
-                    <button
+                    <motion.button
                         key={item.id}
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                             setActiveTab(item.id)
                             setIsOpen(false)
                         }}
                         className={cn(
-                            "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group text-sm font-medium",
+                            "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group text-sm font-medium relative",
                             activeTab === item.id
-                                ? "bg-white/5 text-white shadow-md shadow-black/20"
-                                : "text-gray-400 hover:text-white hover:bg-white/5"
+                                ? "text-white"
+                                : "text-gray-400 hover:text-white"
                         )}
                     >
+                        {activeTab === item.id && (
+                            <motion.div
+                                layoutId="sidebar-active"
+                                className="absolute inset-0 bg-white/5 rounded-xl border border-white/10 shadow-lg"
+                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            />
+                        )}
                         <item.icon
                             size={18}
                             className={cn(
-                                "transition-colors",
+                                "relative z-10 transition-colors",
                                 activeTab === item.id ? "text-indigo-400" : "text-gray-500 group-hover:text-gray-300"
                             )}
                         />
-                        {item.label}
-                    </button>
+                        <span className="relative z-10">{item.label}</span>
+                    </motion.button>
                 ))}
             </div>
 

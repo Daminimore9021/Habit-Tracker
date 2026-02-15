@@ -16,17 +16,24 @@ const containerVariants = {
 }
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  hidden: { opacity: 0, y: 40, scale: 0.9, filter: "blur(10px)" },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
+    filter: "blur(0px)",
     transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1] as any, // Custom cubic-bezier for "premium" feel
-      opacity: { duration: 0.4 }
+      duration: 0.8,
+      ease: [0.22, 1, 0.36, 1] as any,
+      opacity: { duration: 0.5 }
     }
   }
+}
+
+const hoverEffect = {
+  scale: 1.02,
+  y: -5,
+  transition: { duration: 0.4, ease: "easeOut" as any }
 }
 
 // Layout Components
@@ -111,34 +118,45 @@ export default function AnimatedDashboard() {
                 className="space-y-6 sm:space-y-10"
               >
                 {/* Row 1: Hero + Calendar */}
-                <motion.div
-                  variants={cardVariants}
-                  className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10 items-stretch"
-                >
-                  <div className="lg:col-span-2 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10 items-stretch">
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={hoverEffect}
+                    className="lg:col-span-2 h-full"
+                  >
                     <HeroSection />
-                  </div>
-                  <div className="lg:col-span-1 h-full">
+                  </motion.div>
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={hoverEffect}
+                    className="lg:col-span-1 h-full"
+                  >
                     <CalendarWidget selectedDate={selectedDate} onSelect={setSelectedDate} />
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </div>
 
                 {/* Row 2: Widgets & Stats */}
-                <motion.div
-                  variants={cardVariants}
-                  className="grid grid-cols-1 lg:grid-cols-4 gap-6"
-                >
-                  <div className="lg:col-span-1 space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={hoverEffect}
+                    className="lg:col-span-1 space-y-6"
+                  >
                     <FocusTimer />
-                  </div>
-                  <div className="lg:col-span-3">
+                  </motion.div>
+                  <motion.div
+                    variants={cardVariants}
+                    whileHover={hoverEffect}
+                    className="lg:col-span-3"
+                  >
                     <StatsOverview userId={userId || undefined} />
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </div>
 
                 {/* Row 3: Daily Planner (Unified Habits, Routines, Tasks) */}
                 <motion.div
                   variants={cardVariants}
+                  whileHover={hoverEffect}
                 >
                   <DailyPlanner selectedDate={selectedDate} userId={userId || undefined} />
                 </motion.div>

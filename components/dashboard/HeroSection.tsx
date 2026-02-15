@@ -85,7 +85,7 @@ export default function HeroSection() {
                                 exit={{ opacity: 0, y: -10 }}
                                 className={`${getFontSize(quote.text)} font-extrabold text-white leading-tight`}
                             >
-                                {parts[0]}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative inline mx-1">
+                                {parts[0]}<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-amber-400 animate-shimmer relative inline mx-1">
                                     {quote.highlight}
                                     <svg className="absolute w-full h-2 bottom-1 left-0 text-purple-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
                                         <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
@@ -114,18 +114,32 @@ export default function HeroSection() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                    <div className="relative w-48 h-48 animate-float">
+                    <motion.div
+                        animate={{
+                            y: [0, -15, 0],
+                            rotate: [0, 2, 0]
+                        }}
+                        transition={{
+                            duration: 5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        className="relative w-48 h-48"
+                    >
                         <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-fuchsia-600 rounded-[2rem] opacity-30 blur-3xl animate-pulse"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 rounded-[2rem] border border-white/20 shadow-2xl backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
-                            <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl mb-4 flex items-center justify-center shadow-lg shadow-orange-500/20 text-4xl">
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 rounded-[2rem] border border-white/20 shadow-2xl backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center group">
+                            <motion.div
+                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                className="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl mb-4 flex items-center justify-center shadow-lg shadow-orange-500/20 text-4xl"
+                            >
                                 💡
-                            </div>
+                            </motion.div>
                             <div className="space-y-1">
                                 <div className="h-2 w-24 bg-white/10 rounded-full mx-auto"></div>
                                 <div className="h-2 w-16 bg-white/10 rounded-full mx-auto"></div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </motion.div>
             </div>
         </div>

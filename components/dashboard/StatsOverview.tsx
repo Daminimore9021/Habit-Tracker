@@ -5,6 +5,35 @@ import { motion } from 'framer-motion'
 import { TrendingUp, MoreHorizontal, ArrowUp, Loader2, Check } from 'lucide-react'
 import LoadingState from './LoadingState'
 
+function AnimatedNumber({ value }: { value: number }) {
+    const [displayValue, setDisplayValue] = useState(0)
+
+    useEffect(() => {
+        let start = 0
+        const end = value
+        if (start === end) return
+
+        let totalDuration = 1000
+        let iterationTime = 20
+        let totalIterations = totalDuration / iterationTime
+        let increment = end / totalIterations
+
+        let timer = setInterval(() => {
+            start += increment
+            if (start >= end) {
+                setDisplayValue(end)
+                clearInterval(timer)
+            } else {
+                setDisplayValue(Math.floor(start))
+            }
+        }, iterationTime)
+
+        return () => clearInterval(timer)
+    }, [value])
+
+    return <span>{displayValue.toLocaleString()}</span>
+}
+
 interface ProgressRingProps {
     progress: number
     size?: number
@@ -55,7 +84,9 @@ function ProgressRing({
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold text-white leading-none">{progress}%</span>
+                    <span className="text-2xl font-bold text-white leading-none">
+                        <AnimatedNumber value={progress} />%
+                    </span>
                 </div>
             </div>
             <div>
@@ -172,9 +203,12 @@ export default function StatsOverview({ userId }: { userId?: string }) {
 
                     <div className="space-y-4">
                         <div>
-                            <span className="text-4xl font-bold text-white">{data?.thisWeekProgress || 0}%</span>
+                            <span className="text-4xl font-bold text-white">
+                                <AnimatedNumber value={data?.thisWeekProgress || 0} />%
+                            </span>
                             <span className="text-emerald-400 text-xs font-bold ml-2 inline-flex items-center">
-                                <ArrowUp size={12} className="mr-0.5" /> {Math.max(0, (data?.thisWeekProgress || 0) - (data?.lastWeekProgress || 0))}%
+                                <ArrowUp size={12} className="mr-0.5" />
+                                <AnimatedNumber value={Math.max(0, (data?.thisWeekProgress || 0) - (data?.lastWeekProgress || 0))} />%
                             </span>
                         </div>
                         <p className="text-sm text-gray-400 leading-snug">

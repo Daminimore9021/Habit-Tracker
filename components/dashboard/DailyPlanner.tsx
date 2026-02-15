@@ -237,7 +237,14 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Tasks</h3>
                         </div>
-                        <div className="space-y-3">
+                        <motion.div
+                            variants={{
+                                visible: { transition: { staggerChildren: 0.05 } }
+                            }}
+                            initial="hidden"
+                            animate="visible"
+                            className="space-y-3"
+                        >
                             {items.filter(item => item.type === 'task').length === 0 ? (
                                 <div className="text-[10px] text-gray-600 italic py-4">No tasks.</div>
                             ) : (
@@ -251,7 +258,7 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                                     />
                                 ))
                             )}
-                        </div>
+                        </motion.div>
                     </div>
 
                     {/* Habits Section */}
@@ -259,7 +266,14 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Habits</h3>
                         </div>
-                        <div className="space-y-3">
+                        <motion.div
+                            variants={{
+                                visible: { transition: { staggerChildren: 0.05 } }
+                            }}
+                            initial="hidden"
+                            animate="visible"
+                            className="space-y-3"
+                        >
                             {items.filter(item => item.type === 'habit').length === 0 ? (
                                 <div className="text-[10px] text-gray-600 italic py-4">No habits.</div>
                             ) : (
@@ -273,7 +287,7 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                                     />
                                 ))
                             )}
-                        </div>
+                        </motion.div>
                     </div>
 
                     {/* Routines Section */}
@@ -281,7 +295,14 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Routine</h3>
                         </div>
-                        <div className="space-y-3">
+                        <motion.div
+                            variants={{
+                                visible: { transition: { staggerChildren: 0.05 } }
+                            }}
+                            initial="hidden"
+                            animate="visible"
+                            className="space-y-3"
+                        >
                             {items.filter(item => item.type === 'routine').length === 0 ? (
                                 <div className="text-[10px] text-gray-600 italic py-4">No routines.</div>
                             ) : (
@@ -295,7 +316,7 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
                                     />
                                 ))
                             )}
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             )}
@@ -306,8 +327,12 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
 function ItemRow({ item, toggleItem, deleteItem, onView }: { item: Item, toggleItem: any, deleteItem: any, onView: (item: Item) => void }) {
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            layout
+            variants={{
+                hidden: { opacity: 0, x: -20 },
+                visible: { opacity: 1, x: 0 }
+            }}
+            whileHover={{ scale: 1.01, x: 2 }}
             className={`group flex items-center gap-3 p-3 rounded-2xl border transition-all duration-200 ${item.completed
                 ? 'bg-indigo-500/5 border-indigo-500/10 opacity-60'
                 : 'bg-white/[0.02] border-white/5 hover:border-white/10'
