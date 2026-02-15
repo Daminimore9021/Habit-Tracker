@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Lock, Award, Loader2 } from 'lucide-react'
+import LoadingState from './LoadingState'
 
 interface Badge {
     id: string
@@ -91,23 +92,21 @@ export default function AchievementsModal({ isOpen, onClose, userId }: Achieveme
                 {/* Grid */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-8">
                     {loading ? (
-                        <div className="flex items-center justify-center py-20">
-                            <Loader2 className="animate-spin text-indigo-500" size={32} />
-                        </div>
+                        <LoadingState message="Fetching your achievements..." />
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {badges.map((badge) => (
                                 <div
                                     key={badge.id}
                                     className={`relative p-4 rounded-xl border transition-all ${badge.earned
-                                            ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/10'
-                                            : 'bg-black/20 border-white/5 opacity-60 grayscale'
+                                        ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/10'
+                                        : 'bg-black/20 border-white/5 opacity-60 grayscale'
                                         }`}
                                 >
                                     <div className="flex items-start gap-4">
                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg ${badge.earned
-                                                ? `bg-gradient-to-br ${badge.color}`
-                                                : 'bg-gray-800'
+                                            ? `bg-gradient-to-br ${badge.color}`
+                                            : 'bg-gray-800'
                                             }`}>
                                             {badge.earned ? badge.icon : <Lock size={16} className="text-gray-500" />}
                                         </div>

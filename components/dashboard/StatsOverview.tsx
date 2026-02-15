@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { TrendingUp, MoreHorizontal, ArrowUp, Loader2, Check } from 'lucide-react'
+import LoadingState from './LoadingState'
 
 interface ProgressRingProps {
     progress: number
@@ -92,11 +93,7 @@ export default function StatsOverview({ userId }: { userId?: string }) {
     }, [userId])
 
     if (loading && !data) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <Loader2 className="animate-spin text-indigo-500" />
-            </div>
-        )
+        return <LoadingState message="Calculating your progress..." />
     }
 
     const stats = [

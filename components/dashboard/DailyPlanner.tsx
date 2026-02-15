@@ -5,6 +5,7 @@ import { Check, Plus, Loader2, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AddItemModal from './AddItemModal'
 import ItemDetailModal from './ItemDetailModal'
+import LoadingState from './LoadingState'
 
 interface Item {
     id: string
@@ -228,9 +229,7 @@ export default function DailyPlanner({ selectedDate, userId }: { selectedDate: D
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="animate-spin text-indigo-500" />
-                </div>
+                <LoadingState message="Syncing your focus..." />
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Tasks Section */}

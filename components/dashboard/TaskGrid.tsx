@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Trash2, Calendar, Plus, Loader2, Target } from 'lucide-react'
 import AddItemModal from './AddItemModal'
 import ItemDetailModal from './ItemDetailModal'
+import LoadingState from './LoadingState'
 
 export default function TaskGrid({ userId }: { userId?: string }) {
     const [tasks, setTasks] = useState<any[]>([])
@@ -99,9 +100,7 @@ export default function TaskGrid({ userId }: { userId?: string }) {
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center py-20">
-                    <Loader2 className="animate-spin text-indigo-500" />
-                </div>
+                <LoadingState message="Organizing your day..." />
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {tasks.length === 0 ? (

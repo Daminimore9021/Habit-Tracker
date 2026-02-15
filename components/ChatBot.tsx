@@ -77,8 +77,11 @@ export default function ChatBot() {
                 })
             })
 
-            const data = await res.json()
+            if (res.status === 404) {
+                throw new Error("User session expired. Please log in again to use the AI assistant.")
+            }
 
+            const data = await res.json()
             if (data.error) throw new Error(data.error)
 
             const botMessage: Message = {
@@ -92,7 +95,7 @@ export default function ChatBot() {
             console.error("ChatBot Error:", e)
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
-                text: "Sorry, I encountered an error. Please try again later.",
+                text: e.message || "Sorry, I encountered an error. Please try again later.",
                 sender: 'bot',
                 timestamp: new Date()
             }

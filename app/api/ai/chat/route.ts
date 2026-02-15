@@ -147,7 +147,10 @@ Rules:
         return NextResponse.json({ content: text })
 
     } catch (error: any) {
-        console.error('AI Chat Error:', error)
-        return NextResponse.json({ error: error.message || 'Failed to get AI response' }, { status: 500 })
+        console.error('AI Chat Error [FULL]:', error)
+        return NextResponse.json({
+            error: error.message || 'Failed to get AI response',
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 })
     }
 }
