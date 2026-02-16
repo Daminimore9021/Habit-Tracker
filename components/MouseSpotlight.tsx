@@ -31,16 +31,12 @@ export default function MouseSpotlight() {
                 pointerEvents: 'none', // Crucial: don't block clicks or scroll
                 zIndex: 9999,
                 background: `radial-gradient(600px circle at calc(var(--x) * 1px) calc(var(--y) * 1px), rgba(99, 102, 241, 0.05), transparent 80%)`,
-            }}
-            className="hidden lg:block"
-            animate={{
-                // Using CSS variables to avoid re-rendering the whole component on mouse move
-                // motion.div style supports motion values directly too
                 // @ts-ignore
                 '--x': springX,
                 // @ts-ignore
-                '--y': springY
-            } as any}
+                '--y': springY,
+            }}
+            className="hidden lg:block"
         />
     )
 }
