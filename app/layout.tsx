@@ -6,6 +6,10 @@ import { AuthProvider } from '@/contexts/AuthContext'
 export const metadata: Metadata = {
   title: 'HabitQuest | Level Up Your Life',
   description: 'Gamify your habits, track your progress, and level up your life.',
+  icons: {
+    icon: '/icon',
+    apple: '/icon',
+  },
 }
 
 export default function RootLayout({
